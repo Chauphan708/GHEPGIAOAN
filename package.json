@@ -1,0 +1,20 @@
+{
+  "name": "phan-mem-ghep-giao-an-35-tuan",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "node assemble.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "docx": "^9.7.1",
+    "docx-merger": "^1.2.2",
+    "jszip": "^3.10.1"
+  }
+}

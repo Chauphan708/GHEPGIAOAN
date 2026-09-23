@@ -1,0 +1,80 @@
+========================================================================================
+     HƯỚNG DẪN SỬ DỤNG PHẦN MỀM GHÉP GIÁO ÁN / KẾ HOẠCH BÀI DẠY 35 TUẦN (BẢN V2 & HTML5)
+========================================================================================
+
+Phần mềm giúp Thầy/Cô tự động gom và ghép các file Word riêng lẻ của từng môn học 
+(Tiếng Việt, Toán, Khoa học, Lịch sử và Địa lí, Đạo đức, Công nghệ, Hoạt động trải nghiệm...)
+thành các file Kế hoạch bài dạy (KHBD) tổng hợp theo từng tuần từ Tuần 1 đến Tuần 35.
+
+----------------------------------------------------------------------------------------
+3 CÁCH SỬ DỤNG PHẦN MỀM TIỆN LỢI TÙY NHU CẦU:
+----------------------------------------------------------------------------------------
+
+★ CÁCH 1: DÙNG BẢN HTML5 ĐỘC LẬP - SIÊU DI ĐỘNG, CHẠY MỌI MÔI TRƯỜNG (KHUYÊN DÙNG)
+   - Tệp: "Ghep_Giao_An_HTML5.html" hoặc nhấp đúp vào "Mo_Ban_HTML5.bat".
+   - Ưu điểm:
+     + Chạy trực tiếp 100% trong trình duyệt web (Chrome, Edge, Cốc Cốc, Firefox...).
+     + Hoàn toàn KHÔNG CẦN CÀI ĐẶT Node.js hay bất cứ môi trường gì.
+     + Có thể copy file HTML5 này vào USB mang sang bất kỳ máy tính nào của đồng nghiệp, máy trường học, máy cá nhân đều dùng được ngay lập tức.
+     + Hỗ trợ Kéo - Thả trực tiếp thư mục giáo án vào khung trên màn hình.
+     + Hỗ trợ nút "Tải về file ZIP" trọn bộ 35 tuần và "Lưu trực tiếp vào thư mục máy tính".
+
+★ CÁCH 2: DÙNG BẢN WEB LOCAL (ĐẦY ĐỦ TÍNH NĂNG VÀ HỖ TRỢ HỆ ĐIỀU HÀNH)
+   - Tệp: "Chay_Phan_Mem_Web.bat".
+   - Ưu điểm:
+     + Tự động mở hộp thoại chọn thư mục Windows nguyên bản.
+     + Sau khi ghép xong, có nút "Mở thư mục kết quả" tự động mở thư mục chứa file trong Windows Explorer.
+
+★ CÁCH 3: DÙNG BẢN BATCH 1-CLICK / KÉO THẢ NHANH
+   - Tệp: "Ghep_Giao_An_Nho_Gon.bat".
+   - Ưu điểm: Chỉ cần kéo thư mục giáo án thả thẳng vào tệp .bat, phần mềm sẽ tự động lấy thông tin chữ ký đã lưu và ghép siêu tốc trong vài giây mà không cần mở trình duyệt.
+
+----------------------------------------------------------------------------------------
+CÁC TÍNH NĂNG NÂNG CẤP V2 VÀ QUY CHUẨN THIẾT KẾ:
+----------------------------------------------------------------------------------------
+1. TÙY BIẾN CẤU TRÚC ĐẶT TÊN FILE (Tên_KHBD_Tuần_Lớp_Môn):
+   - Thầy/Cô có thể tùy ý thêm/xóa/sửa cấu trúc tên file với các thẻ: {week}, {lop}, {mon}.
+   - Có các nút bấm nhanh: [+ {week}], [+ {lop}], [+ {mon}] và ô nhập Lớp (ví dụ: 5, 5A).
+   - Có ô "Xem trước tên file" cập nhật trực tiếp theo thời gian thực.
+
+2. CHÈN BẢNG CHỮ KÝ DUYỆT LINH HOẠT (TÙY CHỌN 1 CỘT, 2 CỘT HOẶC 3 CỘT):
+   - Nằm ở cuối trang của mỗi tuần (hoặc cuối tài liệu ghép tự do).
+   - Thầy/Cô có thể bấm chọn 1 trong 3 kiểu bố cục phù hợp với quy định từng đơn vị:
+     + 1 Cột (Giáo viên): Dành cho kế hoạch bài dạy cá nhân, chữ ký đặt ở góc phải phía dưới.
+     + 2 Cột (Tổ trưởng - GV): Cột trái Tổ trưởng kiểm tra, cột phải Giáo viên soạn bài.
+     + 3 Cột (BGH - Tổ trưởng - GV): Chuẩn duyệt 3 cấp đầy đủ của trường tiểu học.
+   - Bố cục 3 cột chuẩn văn bản giáo dục:
+     + Cột 1 (Bên trái): BGH (Chức vụ: HIỆU TRƯỞNG / PHÓ HIỆU TRƯỞNG, khoảng trắng ký & đóng dấu, Họ và tên BGH).
+     + Cột 2 (Ở giữa): Tổ trưởng chuyên môn (TỔ TRƯỞNG, khoảng trắng ký tên, Họ và tên Tổ trưởng).
+     + Cột 3 (Bên phải): Dòng ngày tháng địa phương (nhập tùy chỉnh, mặc định: "Trung Nhứt, ngày     tháng     năm 202..."), GIÁO VIÊN, khoảng trắng ký tên, Họ và tên Giáo viên.
+   - TUYỆT ĐỐI KHÔNG CÓ DÒNG "(Ký và ghi rõ họ tên)" theo đúng yêu cầu chỉ đạo.
+   - LƯU 1 LẦN DÙNG MÃI MÃI: Thầy/Cô chỉ cần nhập thông tin 1 lần và bấm nút "Lưu cấu hình vào trình duyệt" (lưu vào localStorage / config.json), phần mềm tự ghi nhớ kiểu cột và họ tên cho tất cả các lần sau.
+
+3. TÙY CHỌN ĐÁNH SỐ TRANG LIÊN TỤC TOÀN TUẦN:
+   - Checkbox bật/tắt linh hoạt. Khi bật, số trang ở chân trang (Footer) sẽ đánh số liên tục từ trang 1 đến trang cuối của tuần (không bị lặp lại số trang khi sang môn mới).
+
+4. BỘ XỬ LÝ AN TOÀN FILE LOCK:
+   - Không bị báo lỗi xung đột ngay cả khi Thầy/Cô đang mở xem file Word đó trên máy tính.
+
+5. XEM CHI TIẾT MÔN CÒN THIẾU & SỐ TIẾT:
+   - Nhấp vào chữ "(Xem)" ở các thẻ tuần để mở cửa sổ xem chính xác môn nào đã có (kèm số lượng tiết nếu môn có nhiều file) và môn nào còn thiếu.
+
+6. HỖ TRỢ GHÉP NHIỀU TIẾT TRONG CÙNG 1 MÔN:
+   - Nếu trong một tuần, một môn học có nhiều tiết dạy ở các file riêng biệt (ví dụ: Toan_T1_Tiet1.docx, Toan_T1_Tiet2.docx), phần mềm tự động gom đủ tất cả các tiết theo thứ tự tự nhiên mà không bị ghi đè hay mất bài.
+
+7. BẢO TOÀN HÌNH ẢNH MINH HỌA VÀ ĐỊNH DẠNG (OPENXML CHUẨN):
+   - Tự động đổi tên và ánh xạ lại các mã liên kết hình ảnh (Relationship ID), tránh tình trạng trùng lặp mã rId làm mất ảnh minh họa bài dạy hoặc làm lỗi file Word khi mở.
+
+8. CHẾ ĐỘ GHÉP TÀI LIỆU TỰ DO (FREE MERGE):
+   - Cho phép ghép danh sách tài liệu Word bất kỳ (báo cáo, đề thi, chuyên đề, kế hoạch năm...) với tính năng kéo thả sắp xếp thứ tự, chèn ngắt trang, đánh số trang liên tục và chèn khối chữ ký duyệt.
+
+9. KHẢ NĂNG TIẾP NHẬN FILE & BẢO MẬT BỘ NHỚ RAM:
+   - Phần mềm không đặt giới hạn cứng số lượng file nạp vào. Máy tính RAM 4GB xử lý mượt mà 300 - 500 file Word cả năm học; máy tính RAM 8GB trở lên có thể nạp thoải mái 800 - 1.500+ file cùng lúc.
+   - Toàn bộ file chỉ lưu tạm trong RAM của trình duyệt, không gửi lên máy chủ internet và TỰ ĐỘNG BIẾN MẤT 100% (giải phóng sạch RAM) ngay khi đóng tab hoặc bấm "Làm mới".
+
+10. ĐIỂM NEO NĂNG SUẤT: QUY TRÌNH GHÉP NHẸ MÁY, CHỐNG TREO ĐƠ:
+   - Để máy tính chạy êm, mượt và không bị đứng trình duyệt khi xử lý hàng trăm file:
+     + Bước 1 - Ghép theo đợt (Học kỳ): Tránh ghép dồn 35 tuần cùng lúc. Bấm nút [Học kỳ 1] để ghép trước 18 tuần đầu (~180 file), lưu file xong bấm tiếp [Học kỳ 2] để ghép 17 tuần còn lại.
+     + Bước 2 - Ưu tiên "Lưu vào thư mục máy": Chọn lưu trực tiếp xuống ổ cứng máy tính để giải phóng RAM ngay, hạn chế dùng nút tải ZIP vì nén ZIP sẽ chiếm thêm nhiều bộ nhớ tạm.
+     + Bước 3 - Làm mới bộ nhớ: Sau khi hoàn tất một đợt lớn, bấm nút [🔄 Làm mới] ở góc trên bên phải để giải phóng 100% RAM trước khi làm đợt mới. Hãy đóng bớt các tab web nặng (như xem video, Facebook) trên máy khi chạy.
+========================================================================================

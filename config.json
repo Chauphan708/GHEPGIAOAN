@@ -1,0 +1,20 @@
+{
+  "signature": {
+    "enabled": true,
+    "placeDate": "Trung Nhứt, ngày     tháng     năm 2026",
+    "bghRole": "HIỆU TRƯỞNG",
+    "bghName": "Lê Hoàng Phúc",
+    "ttRole": "TỔ TRƯỞNG",
+    "ttName": "Nguyễn Thị Mai",
+    "gvRole": "GIÁO VIÊN",
+    "gvName": "Trần Thanh Tâm"
+  },
+  "naming": {
+    "pattern": "KHBD_Tuan_{week}_Lop_{lop}.docx",
+    "lop": "5A"
+  },
+  "options": {
+    "continuousPageNumbering": true,
+    "pageBreak": true
+  }
+}
