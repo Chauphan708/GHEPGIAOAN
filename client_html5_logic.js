@@ -40,9 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function extractWeekNumber(filename) {
         const patterns = [
-            /(?:tu[aàầáảãạ]n|tuan|week|w|t)[\s_\-\.]*0*([1-9]|[1-3][0-5])\b/i,
-            /[_\-\.]0*([1-9]|[1-3][0-5])[_\-\.]/,
-            /\b0*([1-9]|[1-3][0-5])\.(?:docx|doc)$/i
+            /(?:tu[aàầáảãạ]n|tuan|week|w|t)[\s_\-\.]*0*([12]\d|3[0-5]|[1-9])\b/i,
+            /[_\-\.]0*([12]\d|3[0-5]|[1-9])[_\-\.]/,
+            /\b0*([12]\d|3[0-5]|[1-9])\.(?:docx|doc)$/i
         ];
         for (const p of patterns) {
             const m = filename.match(p);
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (w >= 1 && w <= 35) return w;
             }
         }
-        const fallback = filename.match(/\b0*([1-9]|[1-3][0-5])\b/);
+        const fallback = filename.match(/\b0*([12]\d|3[0-5]|[1-9])\b/);
         if (fallback) {
             const w = parseInt(fallback[1], 10);
             if (w >= 1 && w <= 35) return w;

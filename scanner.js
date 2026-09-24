@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 
 function isIgnoredFolder(folderName) {
@@ -30,9 +30,9 @@ function canonicalSubject(folderName) {
 
 function extractWeekNumber(filename) {
     const patterns = [
-        /(?:tu[aàầáảãạ]n|tuan|week|w|t)[\s_\-\.]*0*([1-9]|[1-3][0-5])\b/i,
-        /[_\-\.](0*[1-9]|[1-3][0-5])[_\-\.]/,
-        /\b(?:0*([1-9]|[1-3][0-5]))\.(?:docx|doc)$/i
+        /(?:tu[aàầáảãạ]n|tuan|week|w|t)[\s_\-\.]*0*([12]\d|3[0-5]|[1-9])\b/i,
+        /[_\-\.]0*([12]\d|3[0-5]|[1-9])[_\-\.]/,
+        /\b0*([12]\d|3[0-5]|[1-9])\.(?:docx|doc)$/i
     ];
 
     for (const p of patterns) {
@@ -43,7 +43,7 @@ function extractWeekNumber(filename) {
         }
     }
 
-    const fallbackMatch = filename.match(/\b0*([1-9]|[1-3][0-5])\b/);
+    const fallbackMatch = filename.match(/\b0*([12]\d|3[0-5]|[1-9])\b/);
     if (fallbackMatch) {
         const w = parseInt(fallbackMatch[1], 10);
         if (w >= 1 && w <= 35) return w;
