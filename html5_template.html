@@ -24,9 +24,9 @@
                 <div>
                     <h1 class="app-title">
                         Phần Mềm Ghép Giáo Án &amp; Tài Liệu Word
-                        <span class="app-badge">v2.8 Desktop Pro</span>
+                        <span class="app-badge">v3.0 Desktop Pro</span>
                     </h1>
-                    <p class="app-subtitle">Ghép giáo án 35 tuần theo lớp • Ghép tài liệu Word tự do đa năng • Khối chữ ký chuẩn • Số trang liên tục</p>
+                    <p class="app-subtitle">Ghép giáo án 35 tuần theo lớp • Ghép gộp nhiều tuần thành 1 file • Bổ sung Trang bìa tùy chỉnh • Ghép tài liệu Word tự do • Khối chữ ký chuẩn • Số trang liên tục</p>
                 </div>
             </div>
             <div class="header-center-switch">
@@ -65,7 +65,7 @@
                 </button>
                 <button type="button" class="tab-btn" data-tab="tab-settings">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    2. Tùy biến Tên file &amp; Khối Chữ Ký
+                    2. Tùy biến Tên file, Trang bìa &amp; Chữ ký
                 </button>
                 <button type="button" class="tab-btn" data-tab="tab-process">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -120,7 +120,11 @@
                             <span id="stat-total-weeks" class="stat-val">0 / 35 tuần</span>
                         </div>
                     </div>
-                    <div style="display:flex; gap:0.5rem;">
+                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                        <button type="button" id="btn-quick-cover" class="btn btn-secondary" style="height:36px; padding:0 0.85rem; font-size:0.8rem; background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; font-weight:600;" title="Nhấn để xem và tùy chỉnh thông tin trang bìa">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            ✎ Chỉnh sửa Trang Bìa
+                        </button>
                         <button type="button" id="btn-pick-add-more" class="btn btn-secondary" style="height:36px; padding:0 1rem; font-size:0.8rem;">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                             Nạp thêm file/thư mục
@@ -191,11 +195,97 @@
             <!-- TAB 2: CẤU HÌNH TÊN FILE & KHỐI CHỮ KÝ -->
             <section id="tab-settings" class="tab-panel hidden">
                 <div class="settings-section">
-                    <!-- Thẻ cấu hình tên file -->
+                    <!-- CHẾ ĐỘ XUẤT FILE (BẢN V3) -->
                     <div class="settings-card">
                         <h2 class="settings-card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                            Chế độ ghép &amp; Xuất file giáo án (Bản V3)
+                        </h2>
+                        <p class="settings-card-desc">Thầy/Cô có thể lựa chọn xuất file riêng từng tuần hoặc gộp nhiều tuần liên tiếp vào duy nhất một file Word.</p>
+
+                        <div class="export-mode-grid">
+                            <!-- Lựa chọn 1: Xuất riêng từng tuần -->
+                            <div class="export-mode-card active" id="card-mode-per-week">
+                                <input type="radio" name="export-mode" id="mode-export-per-week" class="export-mode-radio" checked>
+                                <div class="export-mode-info">
+                                    <div class="export-mode-title">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                                        Xuất riêng từng tuần (Mặc định)
+                                    </div>
+                                    <div class="export-mode-desc">Mỗi tuần được chọn sẽ xuất thành 1 file Word riêng biệt (Tuần 1.docx, Tuần 2.docx...). Tải trọn bộ file ZIP hoặc lưu vào thư mục máy tính.</div>
+                                </div>
+                            </div>
+
+                            <!-- Lựa chọn 2: Gộp nhiều tuần thành 1 file -->
+                            <div class="export-mode-card" id="card-mode-bundle">
+                                <input type="radio" name="export-mode" id="mode-export-bundle" class="export-mode-radio">
+                                <div class="export-mode-info">
+                                    <div class="export-mode-title">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                        Gộp nhiều tuần thành 1 FILE DUY NHẤT
+                                    </div>
+                                    <div class="export-mode-desc">Ghép tất cả các tuần đã chọn (Ví dụ: Tuần 1 đến Tuần 4, Học kỳ 1, Cả năm) liên tục theo thứ tự thời gian vào đúng 1 file Word duy nhất.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cấu hình khi chọn gộp nhiều tuần -->
+                        <div id="bundle-settings-wrapper" class="bundle-options-box hidden">
+                            <div style="font-weight: 700; color: var(--text-title); font-size: 0.9rem; margin-bottom: 0.65rem; display: flex; align-items: center; gap: 0.4rem;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                                Cấu trúc đặt tên file gộp nhiều tuần:
+                            </div>
+
+                            <div class="naming-input-row">
+                                <div class="form-group" style="width: 140px;">
+                                    <label for="input-bundle-tengv" class="form-label">Tên GV (viết gọn):</label>
+                                    <input type="text" id="input-bundle-tengv" class="form-control" value="Chau" placeholder="Ví dụ: Chau">
+                                </div>
+                                <div class="form-group" style="flex: 2; min-width: 280px;">
+                                    <label for="input-bundle-pattern" class="form-label">Mẫu định dạng tên file gộp:</label>
+                                    <input type="text" id="input-bundle-pattern" class="form-control" value="{tengv}_KHBD_Tuan_{startWeek}_den_{endWeek}_Lop_{lop}.docx">
+                                </div>
+                                <div class="form-group" style="width: 110px;">
+                                    <label for="input-bundle-lop" class="form-label">Lớp học:</label>
+                                    <input type="text" id="input-bundle-lop" class="form-control" value="5">
+                                </div>
+                            </div>
+
+                            <div class="tag-chips-row">
+                                <span class="tag-label">Chèn nhanh thẻ:</span>
+                                <button type="button" class="btn-chip btn-bundle-tag-chip" data-tag="{tengv}">+ {tengv} (Tên GV)</button>
+                                <button type="button" class="btn-chip btn-bundle-tag-chip" data-tag="{startWeek}">+ {startWeek} (Tuần bắt đầu)</button>
+                                <button type="button" class="btn-chip btn-bundle-tag-chip" data-tag="{endWeek}">+ {endWeek} (Tuần kết thúc)</button>
+                                <button type="button" class="btn-chip btn-bundle-tag-chip" data-tag="{lop}">+ {lop} (Tên Lớp)</button>
+                            </div>
+
+                            <div class="preview-box" style="margin-bottom: 0.85rem;">
+                                <span class="preview-label">Xem trước tên file gộp:</span>
+                                <code id="preview-bundle-filename-text" class="preview-code">Chau_KHBD_Tuan_01_den_04_Lop_5.docx</code>
+                            </div>
+
+                            <!-- Tùy chọn vị trí khối chữ ký khi gộp nhiều tuần -->
+                            <div style="border-top: 1px dashed var(--border-card); padding-top: 0.75rem;">
+                                <label class="form-label" style="font-weight: 700; margin-bottom: 0.4rem; display: block;">Vị trí chèn khối chữ ký khi gộp nhiều tuần:</label>
+                                <div style="display: flex; gap: 1.25rem; flex-wrap: wrap;">
+                                    <label style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.875rem; cursor: pointer; color: var(--text-title); font-weight: 600;">
+                                        <input type="radio" name="bundle-sig-pos" id="rad-bundle-sig-last" value="last" checked style="accent-color: var(--primary);">
+                                        Chỉ chèn chữ ký ở cuối cùng của file gộp (Chuẩn hồ sơ báo cáo)
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.875rem; cursor: pointer; color: var(--text-title);">
+                                        <input type="radio" name="bundle-sig-pos" id="rad-bundle-sig-each" value="each" style="accent-color: var(--primary);">
+                                        Chèn khối chữ ký ở cuối mỗi tuần
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thẻ cấu hình tên file từng tuần -->
+                    <div class="settings-card" id="single-week-naming-card">
+                        <h2 class="settings-card-title">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
-                            Cấu trúc đặt tên file sau khi ghép
+                            Cấu trúc đặt tên file theo từng tuần
                         </h2>
                         <p class="settings-card-desc">Thầy/Cô có thể tùy ý sửa đổi cấu trúc tên file và nhấp vào các thẻ gợi ý bên dưới để thêm/bớt nhanh.</p>
                         
@@ -244,6 +334,76 @@
                                 <div class="checkbox-card-desc">Tự động xóa reset số trang ở đầu mỗi môn học, giúp chân trang (Footer) đánh số liên tục từ trang 1 đến hết tuần.</div>
                             </div>
                         </label>
+                    </div>
+
+                    <!-- THẺ CẤU HÌNH TRANG BÌA (BẢN V3) -->
+                    <div class="settings-card" id="card-cover-page">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+                            <label style="display:flex; align-items:center; gap:0.6rem; font-weight:700; font-size:1rem; cursor:pointer; color:var(--text-title);">
+                                <input type="checkbox" id="chk-enable-cover" checked style="width:18px; height:18px; accent-color:var(--primary);">
+                                Bổ sung Trang Bìa ở đầu tài liệu Word (Tùy chọn cho Bản V3)
+                            </label>
+                            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                                <button type="button" id="btn-save-cover" class="btn btn-secondary" style="height:36px; padding:0 1rem; font-size:0.8rem;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                                    Lưu nội dung Trang Bìa
+                                </button>
+                                <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Chuẩn khung viền trang trọng • Tùy chỉnh 100%</span>
+                            </div>
+                        </div>
+                        <div id="save-cover-msg-toast" class="hidden" style="color:var(--success); font-size:0.85rem; font-weight:600; margin-bottom:0.5rem;">
+                            ✓ Đã lưu nội dung Trang Bìa thành công! Mọi thay đổi đã được ghi nhớ cho các lần sau.
+                        </div>
+                        <p class="settings-card-desc">Tự động tạo 1 trang bìa hồ sơ trang nhã chuẩn ngành Giáo dục với đầy đủ cơ quan chủ quản, trường, tên bài dạy, giáo viên và năm học. Mọi thay đổi nội dung dưới đây được tự động lưu ngay khi gõ và hiển thị trực tiếp ở khung mô phỏng bên phải.</p>
+
+                        <div id="cover-form-wrapper">
+                            <div class="cover-layout-container">
+                                <!-- Cột bên trái: Danh sách các trường động (Ẩn/Hiện, Thêm, Sửa, Xóa) -->
+                                <div>
+                                    <div id="cover-fields-container-tab2" class="cover-form-grid">
+                                        <!-- Được kết xuất động bởi JavaScript -->
+                                    </div>
+                                    <div class="cover-actions-bar">
+                                        <button type="button" id="btn-add-cover-line-tab2" class="btn btn-secondary" style="height:34px; padding:0 0.85rem; font-size:0.8rem; background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; font-weight:600;">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                            Thêm dòng thông tin mới
+                                        </button>
+                                        <button type="button" id="btn-reset-cover-tab2" class="btn btn-secondary" style="height:34px; padding:0 0.85rem; font-size:0.8rem; color:#64748b;">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                                            Khôi phục mẫu bìa chuẩn
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Cột bên phải: Khung mô phỏng trang bìa (Live Preview) -->
+                                <div class="cover-preview-wrapper">
+                                    <div class="cover-preview-header">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        Mô phỏng mẫu Trang Bìa
+                                    </div>
+                                    <div class="cover-preview-sheet">
+                                        <div class="cover-prev-top">
+                                            <div class="cover-prev-parent" id="cover-prev-parent-val">ỦY BAN NHÂN DÂN PHƯỜNG TRUNG NHỨT</div>
+                                            <div class="cover-prev-school" id="cover-prev-school-val">TRƯỜNG TIỂU HỌC TRUNG NHỨT</div>
+                                            <div class="cover-prev-sep" id="cover-prev-sep-val">*** ----------- ***</div>
+                                        </div>
+                                        <div class="cover-prev-mid">
+                                            <div class="cover-prev-title" id="cover-prev-title-val">KẾ HOẠCH BÀI DẠY</div>
+                                            <div class="cover-prev-subtitle" id="cover-prev-subtitle-val">LỚP 5A2</div>
+                                            <div class="cover-prev-deco" id="cover-prev-deco-val">✦ ✧ ✦</div>
+                                        </div>
+                                        <div>
+                                            <div class="cover-prev-bottom-info" id="cover-prev-info-list">
+                                                <div><strong>Giáo viên:</strong> <span>Phan Thái Châu</span></div>
+                                                <div><strong>Lớp:</strong> <span>5A2</span></div>
+                                                <div><strong>Năm học:</strong> <span>2026 - 2027</span></div>
+                                            </div>
+                                            <div class="cover-prev-footer" id="cover-prev-bottom-val">NĂM HỌC 2026 - 2027</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Khối chữ ký phê duyệt 3 cột -->
@@ -401,6 +561,10 @@
                             <div id="completion-desc-text" class="completion-text-desc">Đã tạo và xử lý thành công các tuần được chọn.</div>
                         </div>
                         <div class="completion-buttons">
+                            <button type="button" id="btn-export-single-docx" class="btn btn-download-direct hidden">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                <span id="btn-export-single-label">Tải Về File Word (.docx)</span>
+                            </button>
                             <button type="button" id="btn-export-zip" class="btn btn-cta">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                                 Tải Trọn Bộ File ZIP
@@ -549,6 +713,21 @@
                                 <div class="checkbox-card-desc">Xóa các điểm ngắt khởi tạo lại trang để số trang dưới chân trang (Footer) chạy liền mạch từ trang 1 đến hết tài liệu.</div>
                             </div>
                         </label>
+                    </div>
+
+                    <!-- THẺ CẤU HÌNH TRANG BÌA CHO GHÉP TỰ DO (BẢN V3) -->
+                    <div class="settings-card" style="margin-top: 1.25rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+                            <label style="display:flex; align-items:center; gap:0.6rem; font-weight:700; font-size:1rem; cursor:pointer; color:var(--text-title);">
+                                <input type="checkbox" id="chk-free-enable-cover" checked style="width:18px; height:18px; accent-color:var(--primary);">
+                                Bổ sung Trang Bìa ở đầu tài liệu Word tổng (Tùy chọn cho Bản V3)
+                            </label>
+                            <button type="button" id="btn-free-quick-cover" class="btn btn-secondary" style="height:36px; padding:0 1rem; font-size:0.8rem; background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; font-weight:600;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                ✎ Chỉnh sửa Trang Bìa
+                            </button>
+                        </div>
+                        <p class="settings-card-desc">Tự động chèn 1 trang bìa hồ sơ chuẩn ở đầu file Word ghép tự do trước tất cả các tài liệu. Nhấn "Chỉnh sửa Trang Bìa" để tùy chỉnh đầy đủ thông tin trường, bài dạy, giáo viên, năm học.</p>
                     </div>
 
                     <!-- Cấu hình khối chữ ký phê duyệt 3 cột (chuẩn như nối file giáo án) -->
@@ -707,6 +886,84 @@
             </main>
         </div> <!-- /view-mode-freemerge -->
     </div> <!-- /software-window -->
+
+    <!-- Modal Tùy Chỉnh Nhanh Trang Bìa (Bản V3) -->
+    <div id="modal-cover-overlay" class="modal-overlay hidden">
+        <div class="modal-dialog" style="max-width: 980px; width: 95%; max-height: 92vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="background:#eff6ff; color:var(--primary); width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 style="font-size:1.05rem; font-weight:700; color:var(--text-title); margin:0;">Tùy Chỉnh Nội Dung Trang Bìa (Bản V3)</h3>
+                        <p style="font-size:0.8rem; color:var(--text-muted); margin:0.15rem 0 0 0;">Chỉnh sửa thông tin cơ quan, trường học, tiêu đề bìa, giáo viên, lớp, năm học và xem trước trực tiếp</p>
+                    </div>
+                </div>
+                <button type="button" id="btn-close-cover-modal" class="btn-icon" style="font-size:1.3rem; border:none; cursor:pointer;" title="Đóng">&times;</button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto; padding: 1.25rem;">
+                <div style="margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-card); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-weight:700; cursor:pointer; color:var(--text-title);">
+                        <input type="checkbox" id="modal-chk-enable-cover" checked style="width:18px; height:18px; accent-color:var(--primary);">
+                        Bật chèn Trang Bìa ở đầu tài liệu Word
+                    </label>
+                    <span style="font-size:0.8rem; color:var(--text-muted);">Mọi thay đổi được tự động đồng bộ và lưu trên máy</span>
+                </div>
+
+                <div class="cover-layout-container" style="margin-top:0;">
+                    <!-- Cột trái: Danh sách các trường động (Ẩn/Hiện, Thêm, Sửa, Xóa) -->
+                    <div>
+                        <div id="cover-fields-container-modal" class="cover-form-grid">
+                            <!-- Được kết xuất động bởi JavaScript -->
+                        </div>
+                        <div class="cover-actions-bar">
+                            <button type="button" id="btn-add-cover-line-modal" class="btn btn-secondary" style="height:34px; padding:0 0.85rem; font-size:0.8rem; background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; font-weight:600;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Thêm dòng thông tin mới
+                            </button>
+                            <button type="button" id="btn-reset-cover-modal" class="btn btn-secondary" style="height:34px; padding:0 0.85rem; font-size:0.8rem; color:#64748b;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                                Khôi phục mẫu bìa chuẩn
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cột phải: Live Preview trong Modal -->
+                    <div class="cover-preview-wrapper">
+                        <div class="cover-preview-header">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            Mô phỏng mẫu Trang Bìa
+                        </div>
+                        <div class="cover-preview-sheet">
+                            <div class="cover-prev-top">
+                                <div class="cover-prev-parent" id="modal-cover-prev-parent-val">ỦY BAN NHÂN DÂN PHƯỜNG TRUNG NHỨT</div>
+                                <div class="cover-prev-school" id="modal-cover-prev-school-val">TRƯỜNG TIỂU HỌC TRUNG NHỨT</div>
+                                <div class="cover-prev-sep" id="modal-cover-prev-sep-val">*** ----------- ***</div>
+                            </div>
+                            <div class="cover-prev-mid">
+                                <div class="cover-prev-title" id="modal-cover-prev-title-val">KẾ HOẠCH BÀI DẠY</div>
+                                <div class="cover-prev-subtitle" id="modal-cover-prev-subtitle-val">LỚP 5A2</div>
+                                <div class="cover-prev-deco" id="modal-cover-prev-deco-val">✦ ✧ ✦</div>
+                            </div>
+                            <div>
+                                <div class="cover-prev-bottom-info" id="modal-cover-prev-info-list">
+                                    <div><strong>Giáo viên:</strong> <span>Phan Thái Châu</span></div>
+                                    <div><strong>Lớp:</strong> <span>5A2</span></div>
+                                    <div><strong>Năm học:</strong> <span>2026 - 2027</span></div>
+                                </div>
+                                <div class="cover-prev-footer" id="modal-cover-prev-bottom-val">NĂM HỌC 2026 - 2027</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:0.75rem; padding: 1rem 1.25rem; border-top:1px solid var(--border-card);">
+                <button type="button" id="btn-cancel-cover-modal" class="btn btn-secondary">Đóng</button>
+                <button type="button" id="btn-confirm-cover-modal" class="btn btn-primary" style="font-weight:600;">✓ Hoàn Tất &amp; Áp Dụng</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal Hướng Dẫn Sử Dụng & Điểm Neo Riêng Biệt Ở Góc Trên Bên Phải -->
     <div id="modal-guide-overlay" class="modal-overlay hidden">

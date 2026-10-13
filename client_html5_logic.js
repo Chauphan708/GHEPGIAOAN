@@ -4,7 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================================
     const state = {
         currentMode: 'giaoan', // 'giaoan' | 'freemerge'
+        exportMode: 'per-week', // 'per-week' | 'bundle'
+        bundleSigPos: 'last',   // 'last' | 'each'
         sigLayout: '3col',     // '1col' | '2col' | '3col'
+        coverConfig: null,     // Dynamic Cover Configuration
         filesMap: new Map(), // key: relativePath or filename, value: { file, name, subject, week }
         subjectsList: [],   // [ { name, enabled, count } ]
         weeksMap: {},       // { 1..35: { files: { [subject]: File }, count, status, missing } }
@@ -16,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const escapeXml = s => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    const escapeHtml = s => (s || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
     // ==========================================================================
     // Canonical Subjects & Week Extraction
@@ -40,8 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function extractWeekNumber(filename) {
         const patterns = [
-            /(?:tu[aàầáảãạ]n|tuan|week|w|t)[\s_\-\.]*0*([12]\d|3[0-5]|[1-9])\b/i,
-            /[_\-\.]0*([12]\d|3[0-5]|[1-9])[_\-\.]/,
+            /(?:tu[aàầáảãạ]n|tuan|week|w|t)[\s_.-]*0*([12]\d|3[0-5]|[1-9])(?=[^\d]|$)/i,
+            /[-_.]0*([12]\d|3[0-5]|[1-9])[-_.]/,
             /\b0*([12]\d|3[0-5]|[1-9])\.(?:docx|doc)$/i
         ];
         for (const p of patterns) {
@@ -162,11 +166,73 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnMatrixNone = document.getElementById('btn-matrix-none');
     const barSelectedWeeksCount = document.getElementById('bar-selected-weeks-count');
 
+    // V3 Export Mode Elements
+    const cardModePerWeek = document.getElementById('card-mode-per-week');
+    const cardModeBundle = document.getElementById('card-mode-bundle');
+    const modeExportPerWeek = document.getElementById('mode-export-per-week');
+    const modeExportBundle = document.getElementById('mode-export-bundle');
+    const bundleSettingsWrapper = document.getElementById('bundle-settings-wrapper');
+    const singleWeekNamingCard = document.getElementById('single-week-naming-card');
+    const inputBundleTenGv = document.getElementById('input-bundle-tengv');
+    const inputBundlePattern = document.getElementById('input-bundle-pattern');
+    const inputBundleLop = document.getElementById('input-bundle-lop');
+    const previewBundleFilenameText = document.getElementById('preview-bundle-filename-text');
+    const btnBundleTagChips = document.querySelectorAll('.btn-bundle-tag-chip');
+    const radBundleSigLast = document.getElementById('rad-bundle-sig-last');
+    const radBundleSigEach = document.getElementById('rad-bundle-sig-each');
+
+    // Single Week Naming Elements
     const inputTenGv = document.getElementById('input-tengv');
     const inputNamingPattern = document.getElementById('input-naming-pattern');
     const inputLopName = document.getElementById('input-lop-name');
     const previewFilenameText = document.getElementById('preview-filename-text');
     const btnTagChips = document.querySelectorAll('.btn-tag-chip');
+
+    // V3 Cover Page Elements (Tab 2)
+    const chkEnableCover = document.getElementById('chk-enable-cover');
+    const coverFormWrapper = document.getElementById('cover-form-wrapper');
+    const btnSaveCover = document.getElementById('btn-save-cover');
+    const saveCoverMsgToast = document.getElementById('save-cover-msg-toast');
+
+    // Dynamic Cover Builder Containers & Action Buttons (Tab 2)
+    const coverFieldsContainerTab2 = document.getElementById('cover-fields-container-tab2');
+    const btnAddCoverLineTab2 = document.getElementById('btn-add-cover-line-tab2');
+    const btnResetCoverTab2 = document.getElementById('btn-reset-cover-tab2');
+
+    // Cover Page Miniature Preview Elements (Tab 2)
+    const coverPrevParentVal = document.getElementById('cover-prev-parent-val');
+    const coverPrevSchoolVal = document.getElementById('cover-prev-school-val');
+    const coverPrevSepVal = document.getElementById('cover-prev-sep-val');
+    const coverPrevTitleVal = document.getElementById('cover-prev-title-val');
+    const coverPrevSubtitleVal = document.getElementById('cover-prev-subtitle-val');
+    const coverPrevDecoVal = document.getElementById('cover-prev-deco-val');
+    const coverPrevInfoList = document.getElementById('cover-prev-info-list');
+    const coverPrevBottomVal = document.getElementById('cover-prev-bottom-val');
+
+    // V3 Quick Cover Buttons & Modal Elements
+    const btnQuickCover = document.getElementById('btn-quick-cover');
+    const btnFreeQuickCover = document.getElementById('btn-free-quick-cover');
+    const chkFreeEnableCover = document.getElementById('chk-free-enable-cover');
+    const modalCoverOverlay = document.getElementById('modal-cover-overlay');
+    const btnCloseCoverModal = document.getElementById('btn-close-cover-modal');
+    const btnCancelCoverModal = document.getElementById('btn-cancel-cover-modal');
+    const btnConfirmCoverModal = document.getElementById('btn-confirm-cover-modal');
+    const modalChkEnableCover = document.getElementById('modal-chk-enable-cover');
+
+    // Dynamic Cover Builder Containers & Action Buttons (Modal)
+    const coverFieldsContainerModal = document.getElementById('cover-fields-container-modal');
+    const btnAddCoverLineModal = document.getElementById('btn-add-cover-line-modal');
+    const btnResetCoverModal = document.getElementById('btn-reset-cover-modal');
+
+    // Modal Preview Elements
+    const modalCoverPrevParentVal = document.getElementById('modal-cover-prev-parent-val');
+    const modalCoverPrevSchoolVal = document.getElementById('modal-cover-prev-school-val');
+    const modalCoverPrevSepVal = document.getElementById('modal-cover-prev-sep-val');
+    const modalCoverPrevTitleVal = document.getElementById('modal-cover-prev-title-val');
+    const modalCoverPrevSubtitleVal = document.getElementById('modal-cover-prev-subtitle-val');
+    const modalCoverPrevDecoVal = document.getElementById('modal-cover-prev-deco-val');
+    const modalCoverPrevInfoList = document.getElementById('modal-cover-prev-info-list');
+    const modalCoverPrevBottomVal = document.getElementById('modal-cover-prev-bottom-val');
 
     const chkPageBreak = document.getElementById('chk-page-break');
     const chkContinuousPage = document.getElementById('chk-continuous-page');
@@ -194,6 +260,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const completionDescText = document.getElementById('completion-desc-text');
     const btnExportZip = document.getElementById('btn-export-zip');
     const btnExportFolder = document.getElementById('btn-export-folder');
+    const btnExportSingleDocx = document.getElementById('btn-export-single-docx');
+    const btnExportSingleLabel = document.getElementById('btn-export-single-label');
 
     const modalSubjectDetails = document.getElementById('modal-subject-details');
     const modalDetailsTitle = document.getElementById('modal-details-title');
@@ -346,9 +414,595 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // ==========================================================================
+    // V3 Export Mode & Bundle Naming Logic
+    // ==========================================================================
+    function setExportMode(mode) {
+        state.exportMode = mode;
+        if (cardModePerWeek) cardModePerWeek.classList.toggle('active', mode === 'per-week');
+        if (cardModeBundle) cardModeBundle.classList.toggle('active', mode === 'bundle');
+        if (modeExportPerWeek) modeExportPerWeek.checked = (mode === 'per-week');
+        if (modeExportBundle) modeExportBundle.checked = (mode === 'bundle');
+
+        if (bundleSettingsWrapper) bundleSettingsWrapper.classList.toggle('hidden', mode !== 'bundle');
+        if (singleWeekNamingCard) singleWeekNamingCard.classList.toggle('hidden', mode === 'bundle');
+
+        updateBundleNamingPreview();
+    }
+
+    if (cardModePerWeek) {
+        cardModePerWeek.addEventListener('click', () => setExportMode('per-week'));
+    }
+    if (cardModeBundle) {
+        cardModeBundle.addEventListener('click', () => setExportMode('bundle'));
+    }
+    if (modeExportPerWeek) {
+        modeExportPerWeek.addEventListener('change', () => setExportMode('per-week'));
+    }
+    if (modeExportBundle) {
+        modeExportBundle.addEventListener('change', () => setExportMode('bundle'));
+    }
+
+    function updateBundleNamingPreview() {
+        if (!previewBundleFilenameText || !inputBundlePattern) return;
+        const pattern = inputBundlePattern.value.trim() || '{tengv}_KHBD_Tuan_{startWeek}_den_{endWeek}_Lop_{lop}.docx';
+        const tengv = (inputBundleTenGv ? inputBundleTenGv.value.trim() : '') || 'Chau';
+        const lop = (inputBundleLop ? inputBundleLop.value.trim() : '') || '5';
+
+        const weeksArray = Array.from(state.selectedWeeks).sort((a, b) => a - b);
+        let startW = '01';
+        let endW = '04';
+        if (weeksArray.length > 0) {
+            const minW = weeksArray[0];
+            const maxW = weeksArray[weeksArray.length - 1];
+            startW = minW < 10 ? '0' + minW : String(minW);
+            endW = maxW < 10 ? '0' + maxW : String(maxW);
+        }
+
+        let preview = pattern
+            .replace(/\{tengv\}/gi, tengv)
+            .replace(/\{startWeek\}/g, startW)
+            .replace(/\{endWeek\}/g, endW)
+            .replace(/\{lop\}/g, lop);
+        if (!preview.toLowerCase().endsWith('.docx')) preview += '.docx';
+        previewBundleFilenameText.textContent = preview;
+    }
+
+    if (inputBundleTenGv) inputBundleTenGv.addEventListener('input', updateBundleNamingPreview);
+    if (inputBundlePattern) inputBundlePattern.addEventListener('input', updateBundleNamingPreview);
+    if (inputBundleLop) inputBundleLop.addEventListener('input', updateBundleNamingPreview);
+
+    btnBundleTagChips.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tag = btn.getAttribute('data-tag');
+            if (!inputBundlePattern) return;
+            const pos = inputBundlePattern.selectionStart || inputBundlePattern.value.length;
+            const val = inputBundlePattern.value;
+            inputBundlePattern.value = val.slice(0, pos) + tag + val.slice(pos);
+            inputBundlePattern.focus();
+            updateBundleNamingPreview();
+        });
+    });
+
+    if (radBundleSigLast) {
+        radBundleSigLast.addEventListener('change', () => {
+            if (radBundleSigLast.checked) state.bundleSigPos = 'last';
+        });
+    }
+    if (radBundleSigEach) {
+        radBundleSigEach.addEventListener('change', () => {
+            if (radBundleSigEach.checked) state.bundleSigPos = 'each';
+        });
+    }
+
+    // ==========================================================================
+    // V3 Cover Page Logic & Dynamic Builder (Ẩn/Hiện, Thêm, Sửa, Xóa + Auto-sync)
+    // ==========================================================================
+    const STANDARD_COVER_FIELDS = [
+        { key: 'parentOrg', hasLabel: false },
+        { key: 'schoolName', hasLabel: false },
+        { key: 'title', hasLabel: false },
+        { key: 'subtitle', hasLabel: false },
+        { key: 'teacher', hasLabel: true },
+        { key: 'className', hasLabel: true },
+        { key: 'schoolYear', hasLabel: true },
+        { key: 'bottomLocation', hasLabel: false }
+    ];
+
+    function createDefaultCoverConfig() {
+        return {
+            parentOrg: {
+                enabled: true,
+                title: 'Cơ quan cấp trên / UBND Phường',
+                value: 'ỦY BAN NHÂN DÂN PHƯỜNG TRUNG NHỨT',
+                placeholder: 'ỦY BAN NHÂN DÂN PHƯỜNG TRUNG NHỨT'
+            },
+            schoolName: {
+                enabled: true,
+                title: 'Tên trường Tiểu học',
+                value: 'TRƯỜNG TIỂU HỌC TRUNG NHỨT',
+                placeholder: 'TRƯỜNG TIỂU HỌC TRUNG NHỨT'
+            },
+            title: {
+                enabled: true,
+                title: 'Tên của bìa (Tiêu đề chính)',
+                value: 'KẾ HOẠCH BÀI DẠY',
+                placeholder: 'KẾ HOẠCH BÀI DẠY'
+            },
+            subtitle: {
+                enabled: true,
+                title: 'Tiêu đề phụ / Lớp môn (nếu có)',
+                value: 'LỚP 5A2',
+                placeholder: 'LỚP 5A2'
+            },
+            teacher: {
+                enabled: true,
+                title: 'Họ và tên Giáo viên',
+                label: 'Giáo viên:',
+                value: 'Phan Thái Châu',
+                placeholder: 'Phan Thái Châu'
+            },
+            className: {
+                enabled: true,
+                title: 'Lớp học',
+                label: 'Lớp:',
+                value: '5A2',
+                placeholder: '5A2'
+            },
+            schoolYear: {
+                enabled: true,
+                title: 'Năm học',
+                label: 'Năm học:',
+                value: '2026 - 2027',
+                placeholder: '2026 - 2027'
+            },
+            bottomLocation: {
+                enabled: true,
+                title: 'Dòng địa danh / năm chân trang bìa',
+                value: 'NĂM HỌC 2026 - 2027',
+                placeholder: 'NĂM HỌC 2026 - 2027'
+            },
+            customLines: []
+        };
+    }
+
+    // Initialize default coverConfig in state
+    state.coverConfig = createDefaultCoverConfig();
+
+    function getCoverInfo() {
+        const isEnabled = (chkEnableCover ? chkEnableCover.checked : true);
+        const cfg = state.coverConfig || createDefaultCoverConfig();
+        return {
+            enabled: isEnabled,
+            ...cfg,
+            // Backward-compatible properties for loggers and legacy callers
+            title: (typeof cfg.title === 'object' ? cfg.title.value : cfg.title) || 'KẾ HOẠCH BÀI DẠY',
+            subTitle: (typeof cfg.subtitle === 'object' ? cfg.subtitle.value : cfg.subtitle) || '',
+            teacherName: (typeof cfg.teacher === 'object' ? cfg.teacher.value : cfg.teacherName) || '',
+            classNameVal: (typeof cfg.className === 'object' ? cfg.className.value : cfg.className) || '',
+            schoolYearVal: (typeof cfg.schoolYear === 'object' ? cfg.schoolYear.value : cfg.schoolYear) || '',
+            bottomLocationVal: (typeof cfg.bottomLocation === 'object' ? cfg.bottomLocation.value : cfg.bottomLocation) || ''
+        };
+    }
+
+    function renderCoverBuilder(container, isModal) {
+        if (!container) return;
+        const cfg = state.coverConfig || createDefaultCoverConfig();
+
+        let html = '';
+
+        // Standard 8 Fields
+        STANDARD_COVER_FIELDS.forEach(itemMeta => {
+            const key = itemMeta.key;
+            const item = cfg[key];
+            if (!item) return;
+            const isEnabled = item.enabled !== false;
+
+            if (itemMeta.hasLabel) {
+                html += `
+                <div class="cover-field-card ${isEnabled ? '' : 'is-disabled'}" data-key="${key}">
+                    <div class="cover-field-header">
+                        <label class="cover-field-toggle-label">
+                            <input type="checkbox" class="cover-field-toggle-chk" data-key="${key}" ${isEnabled ? 'checked' : ''}>
+                            <span class="cover-field-name">${escapeHtml(item.title)}</span>
+                        </label>
+                        <div class="cover-field-actions">
+                            <span class="cover-field-status ${isEnabled ? 'status-on' : 'status-off'}">${isEnabled ? 'Đang hiện' : 'Đã ẩn'}</span>
+                            <button type="button" class="btn-field-del" data-action="delete" data-key="${key}" title="Xóa nội dung / Ẩn dòng này">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="cover-field-body cover-field-body-dual">
+                        <input type="text" class="form-input cover-label-input" data-key="${key}" data-type="label" value="${escapeHtml(item.label || '')}" placeholder="Nhãn (VD: Lớp:)" title="Tiền tố / Nhãn hiển thị" ${isEnabled ? '' : 'disabled'}>
+                        <input type="text" class="form-input cover-value-input" data-key="${key}" data-type="value" value="${escapeHtml(item.value || '')}" placeholder="${escapeHtml(item.placeholder || '')}" title="Giá trị nội dung" ${isEnabled ? '' : 'disabled'}>
+                    </div>
+                </div>`;
+            } else {
+                html += `
+                <div class="cover-field-card ${isEnabled ? '' : 'is-disabled'}" data-key="${key}">
+                    <div class="cover-field-header">
+                        <label class="cover-field-toggle-label">
+                            <input type="checkbox" class="cover-field-toggle-chk" data-key="${key}" ${isEnabled ? 'checked' : ''}>
+                            <span class="cover-field-name">${escapeHtml(item.title)}</span>
+                        </label>
+                        <div class="cover-field-actions">
+                            <span class="cover-field-status ${isEnabled ? 'status-on' : 'status-off'}">${isEnabled ? 'Đang hiện' : 'Đã ẩn'}</span>
+                            <button type="button" class="btn-field-del" data-action="delete" data-key="${key}" title="Xóa nội dung / Ẩn dòng này">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="cover-field-body">
+                        <input type="text" class="form-input cover-field-input" data-key="${key}" data-type="value" value="${escapeHtml(item.value || '')}" placeholder="${escapeHtml(item.placeholder || '')}" ${isEnabled ? '' : 'disabled'}>
+                    </div>
+                </div>`;
+            }
+        });
+
+        // Custom Lines
+        if (Array.isArray(cfg.customLines)) {
+            cfg.customLines.forEach((customItem, idx) => {
+                const isEnabled = customItem.enabled !== false;
+                const cKey = customItem.id || `cust_${idx}`;
+                html += `
+                <div class="cover-field-card ${isEnabled ? '' : 'is-disabled'}" data-key="${cKey}" data-custom="true">
+                    <div class="cover-field-header">
+                        <label class="cover-field-toggle-label">
+                            <input type="checkbox" class="cover-field-toggle-chk" data-key="${cKey}" data-custom="true" ${isEnabled ? 'checked' : ''}>
+                            <span class="cover-field-name">${escapeHtml(customItem.title || 'Dòng thông tin tự chọn #' + (idx + 1))}</span>
+                        </label>
+                        <div class="cover-field-actions">
+                            <span class="cover-field-status ${isEnabled ? 'status-on' : 'status-off'}">${isEnabled ? 'Đang hiện' : 'Đã ẩn'}</span>
+                            <button type="button" class="btn-field-del" data-action="delete" data-key="${cKey}" data-custom="true" title="Xóa hoàn toàn dòng này">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="cover-field-body cover-field-body-dual">
+                        <input type="text" class="form-input cover-label-input" data-key="${cKey}" data-custom="true" data-type="label" value="${escapeHtml(customItem.label || '')}" placeholder="Nhãn (VD: Tổ:)" title="Tiền tố / Nhãn hiển thị" ${isEnabled ? '' : 'disabled'}>
+                        <input type="text" class="form-input cover-value-input" data-key="${cKey}" data-custom="true" data-type="value" value="${escapeHtml(customItem.value || '')}" placeholder="Nội dung thông tin..." title="Giá trị nội dung" ${isEnabled ? '' : 'disabled'}>
+                    </div>
+                </div>`;
+            });
+        }
+
+        container.innerHTML = html;
+    }
+
+    function refreshAllCoverBuilders() {
+        renderCoverBuilder(coverFieldsContainerTab2, false);
+        renderCoverBuilder(coverFieldsContainerModal, true);
+    }
+
+    function attachCoverBuilderListeners(container) {
+        if (!container) return;
+
+        // Real-time typing sync & auto-save
+        container.addEventListener('input', (e) => {
+            const input = e.target;
+            const key = input.getAttribute('data-key');
+            const type = input.getAttribute('data-type');
+            const isCustom = input.getAttribute('data-custom') === 'true';
+            if (!key || !type) return;
+
+            const val = input.value;
+
+            if (isCustom) {
+                const item = state.coverConfig.customLines.find(x => x.id === key);
+                if (item) {
+                    if (type === 'value') item.value = val;
+                    else if (type === 'label') item.label = val;
+                }
+            } else {
+                const item = state.coverConfig[key];
+                if (item) {
+                    if (type === 'value') item.value = val;
+                    else if (type === 'label') item.label = val;
+                }
+            }
+
+            // Mirror directly to the sibling container without re-rendering to keep keyboard focus!
+            const siblingContainer = (container === coverFieldsContainerTab2) ? coverFieldsContainerModal : coverFieldsContainerTab2;
+            if (siblingContainer) {
+                const siblingInput = siblingContainer.querySelector(`[data-key="${key}"][data-type="${type}"]`);
+                if (siblingInput && siblingInput.value !== val) {
+                    siblingInput.value = val;
+                }
+            }
+
+            updateCoverPreview();
+            saveCoverSettingsToStorage();
+        });
+
+        // Show/Hide toggle checkbox
+        container.addEventListener('change', (e) => {
+            if (!e.target.classList.contains('cover-field-toggle-chk')) return;
+            const chk = e.target;
+            const key = chk.getAttribute('data-key');
+            const isCustom = chk.getAttribute('data-custom') === 'true';
+            const checked = chk.checked;
+
+            if (isCustom) {
+                const item = state.coverConfig.customLines.find(x => x.id === key);
+                if (item) item.enabled = checked;
+            } else {
+                const item = state.coverConfig[key];
+                if (item) item.enabled = checked;
+            }
+
+            refreshAllCoverBuilders();
+            updateCoverPreview();
+            saveCoverSettingsToStorage();
+            renderSequenceFlow();
+        });
+
+        // Delete / Clear button
+        container.addEventListener('click', (e) => {
+            const delBtn = e.target.closest('[data-action="delete"]');
+            if (!delBtn) return;
+            const key = delBtn.getAttribute('data-key');
+            const isCustom = delBtn.getAttribute('data-custom') === 'true';
+
+            if (isCustom) {
+                state.coverConfig.customLines = state.coverConfig.customLines.filter(x => x.id !== key);
+                showToast('✓ Đã xóa dòng thông tin tùy chỉnh!', 'success');
+            } else {
+                const item = state.coverConfig[key];
+                if (item) {
+                    item.value = '';
+                    item.enabled = false;
+                }
+                showToast('✓ Đã xóa nội dung và ẩn dòng này!', 'success');
+            }
+
+            refreshAllCoverBuilders();
+            updateCoverPreview();
+            saveCoverSettingsToStorage();
+            renderSequenceFlow();
+        });
+    }
+
+    attachCoverBuilderListeners(coverFieldsContainerTab2);
+    attachCoverBuilderListeners(coverFieldsContainerModal);
+
+    function addCustomCoverLine() {
+        if (!state.coverConfig) state.coverConfig = createDefaultCoverConfig();
+        if (!Array.isArray(state.coverConfig.customLines)) state.coverConfig.customLines = [];
+
+        const newId = 'cust_' + Date.now();
+        const count = state.coverConfig.customLines.length + 1;
+        state.coverConfig.customLines.push({
+            id: newId,
+            enabled: true,
+            title: `Dòng bổ sung #${count}`,
+            label: 'Thông tin:',
+            value: ''
+        });
+
+        refreshAllCoverBuilders();
+        updateCoverPreview();
+        saveCoverSettingsToStorage();
+
+        setTimeout(() => {
+            const activeContainer = (modalCoverOverlay && !modalCoverOverlay.classList.contains('hidden'))
+                ? coverFieldsContainerModal
+                : coverFieldsContainerTab2;
+            if (activeContainer) {
+                const input = activeContainer.querySelector(`[data-key="${newId}"][data-type="value"]`);
+                if (input) input.focus();
+            }
+        }, 60);
+
+        showToast('✓ Đã thêm 1 dòng thông tin mới vào Trang Bìa!', 'success');
+    }
+
+    if (btnAddCoverLineTab2) btnAddCoverLineTab2.addEventListener('click', addCustomCoverLine);
+    if (btnAddCoverLineModal) btnAddCoverLineModal.addEventListener('click', addCustomCoverLine);
+
+    function resetCoverToDefault() {
+        state.coverConfig = createDefaultCoverConfig();
+        refreshAllCoverBuilders();
+        updateCoverPreview();
+        saveCoverSettingsToStorage();
+        renderSequenceFlow();
+        showToast('✓ Đã khôi phục mẫu Trang Bìa chuẩn ban đầu!', 'success');
+    }
+
+    if (btnResetCoverTab2) btnResetCoverTab2.addEventListener('click', resetCoverToDefault);
+    if (btnResetCoverModal) btnResetCoverModal.addEventListener('click', resetCoverToDefault);
+
+    function updateCoverPreview() {
+        const cfg = state.coverConfig || createDefaultCoverConfig();
+
+        const parentVal = (cfg.parentOrg && cfg.parentOrg.enabled && cfg.parentOrg.value) ? cfg.parentOrg.value.trim().toUpperCase() : '';
+        const schoolVal = (cfg.schoolName && cfg.schoolName.enabled && cfg.schoolName.value) ? cfg.schoolName.value.trim().toUpperCase() : '';
+        const titleVal = (cfg.title && cfg.title.enabled && cfg.title.value) ? cfg.title.value.trim().toUpperCase() : '';
+        const subtitleVal = (cfg.subtitle && cfg.subtitle.enabled && cfg.subtitle.value) ? cfg.subtitle.value.trim().toUpperCase() : '';
+        const bottomVal = (cfg.bottomLocation && cfg.bottomLocation.enabled && cfg.bottomLocation.value) ? cfg.bottomLocation.value.trim().toUpperCase() : '';
+
+        // Standard & custom info lines
+        const infoLines = [];
+        if (cfg.teacher && cfg.teacher.enabled && (cfg.teacher.value || cfg.teacher.label)) {
+            infoLines.push({ label: cfg.teacher.label || 'Giáo viên:', value: cfg.teacher.value || '' });
+        }
+        if (cfg.className && cfg.className.enabled && (cfg.className.value || cfg.className.label)) {
+            infoLines.push({ label: cfg.className.label || 'Lớp:', value: cfg.className.value || '' });
+        }
+        if (cfg.schoolYear && cfg.schoolYear.enabled && (cfg.schoolYear.value || cfg.schoolYear.label)) {
+            infoLines.push({ label: cfg.schoolYear.label || 'Năm học:', value: cfg.schoolYear.value || '' });
+        }
+        if (Array.isArray(cfg.customLines)) {
+            cfg.customLines.forEach(c => {
+                if (c.enabled !== false && (c.value || c.label)) {
+                    infoLines.push({ label: c.label || '', value: c.value || '' });
+                }
+            });
+        }
+
+        const infoListHtml = infoLines.map(line =>
+            `<div><strong>${escapeHtml(line.label ? line.label + ' ' : '')}</strong><span>${escapeHtml(line.value)}</span></div>`
+        ).join('');
+
+        const updatePreviewSheet = (pParent, pSchool, pSep, pTitle, pSub, pDeco, pInfoList, pBottom) => {
+            if (pParent) {
+                pParent.textContent = parentVal;
+                pParent.style.display = parentVal ? 'block' : 'none';
+            }
+            if (pSchool) {
+                pSchool.textContent = schoolVal;
+                pSchool.style.display = schoolVal ? 'block' : 'none';
+            }
+            if (pSep) {
+                pSep.style.display = (parentVal || schoolVal) ? 'block' : 'none';
+            }
+            if (pTitle) {
+                pTitle.textContent = titleVal;
+                pTitle.style.display = titleVal ? 'block' : 'none';
+            }
+            if (pSub) {
+                pSub.textContent = subtitleVal;
+                pSub.style.display = subtitleVal ? 'block' : 'none';
+            }
+            if (pDeco) {
+                pDeco.style.display = titleVal ? 'block' : 'none';
+            }
+            if (pInfoList) {
+                pInfoList.innerHTML = infoListHtml;
+                pInfoList.style.display = infoLines.length > 0 ? 'block' : 'none';
+            }
+            if (pBottom) {
+                pBottom.textContent = bottomVal;
+                pBottom.style.display = bottomVal ? 'block' : 'none';
+            }
+        };
+
+        // Update Tab 2 Preview
+        updatePreviewSheet(
+            coverPrevParentVal, coverPrevSchoolVal, coverPrevSepVal,
+            coverPrevTitleVal, coverPrevSubtitleVal, coverPrevDecoVal,
+            coverPrevInfoList, coverPrevBottomVal
+        );
+
+        // Update Modal Preview
+        updatePreviewSheet(
+            modalCoverPrevParentVal, modalCoverPrevSchoolVal, modalCoverPrevSepVal,
+            modalCoverPrevTitleVal, modalCoverPrevSubtitleVal, modalCoverPrevDecoVal,
+            modalCoverPrevInfoList, modalCoverPrevBottomVal
+        );
+    }
+
+    function saveCoverSettingsToStorage() {
+        try {
+            const saved = localStorage.getItem('giao_an_desktop_v3_settings') || localStorage.getItem('giao_an_desktop_v2_settings');
+            let cfg = {};
+            if (saved) {
+                try { cfg = JSON.parse(saved); } catch (_) {}
+            }
+            cfg.enableCover = chkEnableCover ? chkEnableCover.checked : true;
+            cfg.coverConfig = state.coverConfig;
+
+            // Backward compatibility flat keys
+            if (state.coverConfig) {
+                cfg.coverParentOrg = state.coverConfig.parentOrg?.value || '';
+                cfg.coverSchoolName = state.coverConfig.schoolName?.value || '';
+                cfg.coverTitle = state.coverConfig.title?.value || '';
+                cfg.coverSubtitle = state.coverConfig.subtitle?.value || '';
+                cfg.coverTeacherName = state.coverConfig.teacher?.value || '';
+                cfg.coverClassName = state.coverConfig.className?.value || '';
+                cfg.coverSchoolYear = state.coverConfig.schoolYear?.value || '';
+                cfg.coverBottomLoc = state.coverConfig.bottomLocation?.value || '';
+            }
+
+            localStorage.setItem('giao_an_desktop_v3_settings', JSON.stringify(cfg));
+            localStorage.setItem('giao_an_desktop_v2_settings', JSON.stringify(cfg));
+        } catch (e) {
+            console.warn('Lỗi khi tự động lưu cấu hình trang bìa:', e);
+        }
+    }
+
+    function openCoverModal() {
+        if (modalChkEnableCover && chkEnableCover) {
+            modalChkEnableCover.checked = chkEnableCover.checked;
+        }
+        refreshAllCoverBuilders();
+        updateCoverPreview();
+        if (modalCoverOverlay) modalCoverOverlay.classList.remove('hidden');
+    }
+
+    function closeCoverModal() {
+        if (modalCoverOverlay) modalCoverOverlay.classList.add('hidden');
+    }
+
+    if (chkEnableCover) {
+        chkEnableCover.addEventListener('change', () => {
+            if (coverFormWrapper) {
+                coverFormWrapper.classList.toggle('hidden', !chkEnableCover.checked);
+            }
+            if (modalChkEnableCover) modalChkEnableCover.checked = chkEnableCover.checked;
+            if (chkFreeEnableCover) chkFreeEnableCover.checked = chkEnableCover.checked;
+            updateCoverPreview();
+            renderSequenceFlow();
+            saveCoverSettingsToStorage();
+        });
+    }
+
+    if (modalChkEnableCover) {
+        modalChkEnableCover.addEventListener('change', () => {
+            if (chkEnableCover) {
+                chkEnableCover.checked = modalChkEnableCover.checked;
+                if (coverFormWrapper) coverFormWrapper.classList.toggle('hidden', !chkEnableCover.checked);
+            }
+            if (chkFreeEnableCover) chkFreeEnableCover.checked = modalChkEnableCover.checked;
+            updateCoverPreview();
+            renderSequenceFlow();
+            saveCoverSettingsToStorage();
+        });
+    }
+
+    if (chkFreeEnableCover) {
+        chkFreeEnableCover.addEventListener('change', () => {
+            if (chkEnableCover) chkEnableCover.checked = chkFreeEnableCover.checked;
+            if (modalChkEnableCover) modalChkEnableCover.checked = chkFreeEnableCover.checked;
+            saveCoverSettingsToStorage();
+        });
+    }
+
+    if (btnQuickCover) {
+        btnQuickCover.addEventListener('click', openCoverModal);
+    }
+    if (btnFreeQuickCover) {
+        btnFreeQuickCover.addEventListener('click', openCoverModal);
+    }
+    if (btnCloseCoverModal) {
+        btnCloseCoverModal.addEventListener('click', closeCoverModal);
+    }
+    if (btnCancelCoverModal) {
+        btnCancelCoverModal.addEventListener('click', closeCoverModal);
+    }
+    if (btnConfirmCoverModal) {
+        btnConfirmCoverModal.addEventListener('click', () => {
+            saveCoverSettingsToStorage();
+            closeCoverModal();
+            renderSequenceFlow();
+            showToast('✓ Đã cập nhật và lưu cấu hình Trang Bìa thành công!', 'success');
+        });
+    }
+
+    if (btnSaveCover) {
+        btnSaveCover.addEventListener('click', () => {
+            saveCoverSettingsToStorage();
+            if (saveCoverMsgToast) {
+                saveCoverMsgToast.classList.remove('hidden');
+                setTimeout(() => saveCoverMsgToast.classList.add('hidden'), 3500);
+            }
+            showToast('✓ Đã lưu nội dung Trang Bìa thành công!', 'success');
+        });
+    }
+
     function loadSavedSettings() {
         try {
-            const saved = localStorage.getItem('giao_an_desktop_v2_settings');
+            const saved = localStorage.getItem('giao_an_desktop_v3_settings') || localStorage.getItem('giao_an_desktop_v2_settings');
             if (saved) {
                 const cfg = JSON.parse(saved);
                 if (cfg.tengv && inputTenGv) inputTenGv.value = cfg.tengv;
@@ -397,13 +1051,86 @@ document.addEventListener('DOMContentLoaded', () => {
                     sigGvName.value = cfg.gvName;
                     if (freeSigGvName) freeSigGvName.value = cfg.gvName;
                 }
+
+                // V3 Export Mode & Bundle Settings
+                if (cfg.exportMode) {
+                    setExportMode(cfg.exportMode);
+                } else {
+                    setExportMode('per-week');
+                }
+                if (cfg.bundlePattern && inputBundlePattern) inputBundlePattern.value = cfg.bundlePattern;
+                if (cfg.bundleTenGv && inputBundleTenGv) inputBundleTenGv.value = cfg.bundleTenGv;
+                if (cfg.bundleLop && inputBundleLop) inputBundleLop.value = cfg.bundleLop;
+                if (cfg.bundleSigPos) {
+                    state.bundleSigPos = cfg.bundleSigPos;
+                    if (radBundleSigLast) radBundleSigLast.checked = (cfg.bundleSigPos === 'last');
+                    if (radBundleSigEach) radBundleSigEach.checked = (cfg.bundleSigPos === 'each');
+                }
+
+                // V3 Cover Page Settings
+                const enableCoverSetting = (cfg.enableCover !== undefined) ? cfg.enableCover : true;
+                if (chkEnableCover) {
+                    chkEnableCover.checked = enableCoverSetting;
+                    if (coverFormWrapper) coverFormWrapper.classList.toggle('hidden', !enableCoverSetting);
+                }
+                if (modalChkEnableCover) modalChkEnableCover.checked = enableCoverSetting;
+                if (chkFreeEnableCover) chkFreeEnableCover.checked = enableCoverSetting;
+
+                if (cfg.coverConfig && typeof cfg.coverConfig === 'object') {
+                    const def = createDefaultCoverConfig();
+                    state.coverConfig = {
+                        ...def,
+                        ...cfg.coverConfig,
+                        parentOrg: { ...def.parentOrg, ...(cfg.coverConfig.parentOrg || {}) },
+                        schoolName: { ...def.schoolName, ...(cfg.coverConfig.schoolName || {}) },
+                        title: { ...def.title, ...(cfg.coverConfig.title || {}) },
+                        subtitle: { ...def.subtitle, ...(cfg.coverConfig.subtitle || {}) },
+                        teacher: { ...def.teacher, ...(cfg.coverConfig.teacher || {}) },
+                        className: { ...def.className, ...(cfg.coverConfig.className || {}) },
+                        schoolYear: { ...def.schoolYear, ...(cfg.coverConfig.schoolYear || {}) },
+                        bottomLocation: { ...def.bottomLocation, ...(cfg.coverConfig.bottomLocation || {}) },
+                        customLines: Array.isArray(cfg.coverConfig.customLines) ? cfg.coverConfig.customLines : []
+                    };
+                    if (state.coverConfig.teacher && (state.coverConfig.teacher.value === 'Phan Thị Thùy Châu' || !state.coverConfig.teacher.value)) {
+                        state.coverConfig.teacher.value = 'Phan Thái Châu';
+                    }
+                } else {
+                    state.coverConfig = createDefaultCoverConfig();
+                    if (cfg.coverParentOrg !== undefined) state.coverConfig.parentOrg.value = cfg.coverParentOrg;
+                    if (cfg.coverSchoolName !== undefined) state.coverConfig.schoolName.value = cfg.coverSchoolName;
+                    if (cfg.coverTitle !== undefined) state.coverConfig.title.value = cfg.coverTitle;
+                    if (cfg.coverSubtitle !== undefined) state.coverConfig.subtitle.value = cfg.coverSubtitle;
+                    if (cfg.coverTeacherName !== undefined) state.coverConfig.teacher.value = cfg.coverTeacherName;
+                    if (cfg.coverClassName !== undefined) state.coverConfig.className.value = cfg.coverClassName;
+                    if (cfg.coverSchoolYear !== undefined) state.coverConfig.schoolYear.value = cfg.coverSchoolYear;
+                    if (cfg.coverBottomLoc !== undefined) state.coverConfig.bottomLocation.value = cfg.coverBottomLoc;
+                }
             } else {
                 setSigLayout('3col');
+                setExportMode('per-week');
+                if (chkEnableCover) {
+                    chkEnableCover.checked = true;
+                    if (coverFormWrapper) coverFormWrapper.classList.remove('hidden');
+                }
+                if (modalChkEnableCover) modalChkEnableCover.checked = true;
+                if (chkFreeEnableCover) chkFreeEnableCover.checked = true;
+                state.coverConfig = createDefaultCoverConfig();
             }
         } catch(e) {
             setSigLayout('3col');
+            setExportMode('per-week');
+            if (chkEnableCover) {
+                chkEnableCover.checked = true;
+                if (coverFormWrapper) coverFormWrapper.classList.remove('hidden');
+            }
+            if (modalChkEnableCover) modalChkEnableCover.checked = true;
+            if (chkFreeEnableCover) chkFreeEnableCover.checked = true;
+            state.coverConfig = createDefaultCoverConfig();
         }
+        refreshAllCoverBuilders();
         updateNamingPreview();
+        updateBundleNamingPreview();
+        updateCoverPreview();
         updateFreeNamingPreview();
     }
 
@@ -422,9 +1149,29 @@ document.addEventListener('DOMContentLoaded', () => {
             ttRole: sigTtRole.value.trim(),
             ttName: sigTtName.value.trim(),
             gvRole: sigGvRole.value.trim(),
-            gvName: sigGvName.value.trim()
+            gvName: sigGvName.value.trim(),
+
+            // V3 Settings
+            exportMode: state.exportMode || 'per-week',
+            bundlePattern: inputBundlePattern ? inputBundlePattern.value.trim() : '',
+            bundleTenGv: inputBundleTenGv ? inputBundleTenGv.value.trim() : '',
+            bundleLop: inputBundleLop ? inputBundleLop.value.trim() : '',
+            bundleSigPos: state.bundleSigPos || 'last',
+
+            enableCover: chkEnableCover ? chkEnableCover.checked : false,
+            coverConfig: state.coverConfig,
+            coverParentOrg: state.coverConfig?.parentOrg?.value || '',
+            coverSchoolName: state.coverConfig?.schoolName?.value || '',
+            coverTitle: state.coverConfig?.title?.value || '',
+            coverSubtitle: state.coverConfig?.subtitle?.value || '',
+            coverTeacherName: state.coverConfig?.teacher?.value || '',
+            coverClassName: state.coverConfig?.className?.value || '',
+            coverSchoolYear: state.coverConfig?.schoolYear?.value || '',
+            coverBottomLoc: state.coverConfig?.bottomLocation?.value || ''
         };
+        localStorage.setItem('giao_an_desktop_v3_settings', JSON.stringify(cfg));
         localStorage.setItem('giao_an_desktop_v2_settings', JSON.stringify(cfg));
+
         if (chkFreeEnableSig) chkFreeEnableSig.checked = cfg.enableSig;
         if (freeSigFormWrapper) freeSigFormWrapper.classList.toggle('hidden', !cfg.enableSig);
         if (freeSigPlaceDate) freeSigPlaceDate.value = cfg.placeDate;
@@ -434,9 +1181,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (freeSigTtName) freeSigTtName.value = cfg.ttName;
         if (freeSigGvRole) freeSigGvRole.value = cfg.gvRole;
         if (freeSigGvName) freeSigGvName.value = cfg.gvName;
+
         saveMsgToast.classList.remove('hidden');
         setTimeout(() => saveMsgToast.classList.add('hidden'), 3500);
-        showToast('Đã lưu các cấu hình thành công!');
+        showToast('✓ Đã lưu toàn bộ cấu hình V3 thành công!');
     });
 
     chkEnableSignature.addEventListener('change', () => {
@@ -816,6 +1564,54 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (chkEnableCover && chkEnableCover.checked) {
+            const coverPill = document.createElement('span');
+            coverPill.className = 'flow-pill pill-sig';
+            coverPill.style.background = '#e0f2fe';
+            coverPill.style.color = '#0369a1';
+            coverPill.style.borderColor = '#bae6fd';
+            coverPill.style.cursor = 'pointer';
+            coverPill.title = 'Nhấn vào đây để xem và chỉnh sửa nội dung Trang Bìa';
+            coverPill.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                [Trang Bìa Giáo Án ✎ Sửa]
+            `;
+            coverPill.addEventListener('click', openCoverModal);
+            sequenceFlowPills.appendChild(coverPill);
+
+            const arrow = document.createElement('span');
+            arrow.className = 'flow-arrow';
+            arrow.textContent = '➔';
+            sequenceFlowPills.appendChild(arrow);
+        } else {
+            const coverPill = document.createElement('span');
+            coverPill.className = 'flow-pill';
+            coverPill.style.background = '#f8fafc';
+            coverPill.style.color = '#64748b';
+            coverPill.style.borderColor = '#cbd5e1';
+            coverPill.style.borderStyle = 'dashed';
+            coverPill.style.cursor = 'pointer';
+            coverPill.title = 'Nhấn vào đây để bật và tùy chỉnh Trang Bìa';
+            coverPill.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                [+ Thêm Trang Bìa]
+            `;
+            coverPill.addEventListener('click', () => {
+                if (chkEnableCover) chkEnableCover.checked = true;
+                if (modalChkEnableCover) modalChkEnableCover.checked = true;
+                if (coverFormWrapper) coverFormWrapper.classList.remove('hidden');
+                openCoverModal();
+                renderSequenceFlow();
+                saveCoverSettingsToStorage();
+            });
+            sequenceFlowPills.appendChild(coverPill);
+
+            const arrow = document.createElement('span');
+            arrow.className = 'flow-arrow';
+            arrow.textContent = '➔';
+            sequenceFlowPills.appendChild(arrow);
+        }
+
         activeSubs.forEach((sub, idx) => {
             const pill = document.createElement('span');
             pill.className = 'flow-pill';
@@ -1160,6 +1956,335 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================================
     // Merge Engine & Execution (Chuẩn OpenXML ISO/IEC 29500)
     // ==========================================================================
+    const standardNamespaces = {
+        'wpc': 'http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas',
+        'cx': 'http://schemas.microsoft.com/office/drawing/2014/chartex',
+        'cx1': 'http://schemas.microsoft.com/office/drawing/2015/9/8/chartex',
+        'cx2': 'http://schemas.microsoft.com/office/drawing/2015/10/21/chartex',
+        'cx3': 'http://schemas.microsoft.com/office/drawing/2016/5/9/chartex',
+        'cx4': 'http://schemas.microsoft.com/office/drawing/2016/5/10/chartex',
+        'cx5': 'http://schemas.microsoft.com/office/drawing/2016/5/11/chartex',
+        'cx6': 'http://schemas.microsoft.com/office/drawing/2016/5/12/chartex',
+        'cx7': 'http://schemas.microsoft.com/office/drawing/2016/5/13/chartex',
+        'cx8': 'http://schemas.microsoft.com/office/drawing/2016/5/14/chartex',
+        'mc': 'http://schemas.openxmlformats.org/markup-compatibility/2006',
+        'aink': 'http://schemas.microsoft.com/office/drawing/2016/ink',
+        'am3d': 'http://schemas.microsoft.com/office/drawing/2017/model3d',
+        'o': 'urn:schemas-microsoft-com:office:office',
+        'r': 'http://schemas.openxmlformats.org/officeDocument/2006/relationships',
+        'm': 'http://schemas.openxmlformats.org/officeDocument/2006/math',
+        'v': 'urn:schemas-microsoft-com:vml',
+        'wp14': 'http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing',
+        'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing',
+        'w10': 'urn:schemas-microsoft-com:office:word',
+        'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main',
+        'w14': 'http://schemas.microsoft.com/office/word/2010/wordml',
+        'w15': 'http://schemas.microsoft.com/office/word/2012/wordml',
+        'w16cex': 'http://schemas.microsoft.com/office/word/2018/wordml/cex',
+        'w16cid': 'http://schemas.microsoft.com/office/word/2016/wordml/cid',
+        'w16': 'http://schemas.microsoft.com/office/word/2018/wordml',
+        'w16se': 'http://schemas.microsoft.com/office/word/2015/wordml/symex',
+        'wpg': 'http://schemas.microsoft.com/office/word/2010/wordprocessingGroup',
+        'wpi': 'http://schemas.microsoft.com/office/word/2010/wordprocessingInk',
+        'wne': 'http://schemas.microsoft.com/office/word/2006/wordml',
+        'wps': 'http://schemas.microsoft.com/office/word/2010/wordprocessingShape',
+        'a': 'http://schemas.openxmlformats.org/drawingml/2006/main',
+        'a14': 'http://schemas.microsoft.com/office/drawing/2010/main',
+        'pic': 'http://schemas.openxmlformats.org/drawingml/2006/picture'
+    };
+
+    function buildRootDocumentTag(allNamespacesMap) {
+        let nsAttrs = '';
+        for (const [k, v] of Object.entries(allNamespacesMap)) {
+            nsAttrs += ` xmlns:${k}="${v}"`;
+        }
+        nsAttrs += ` mc:Ignorable="w14 w15 w16se w16cid w16 w16cex wp14"`;
+        return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<w:document${nsAttrs}>`;
+    }
+
+    function fixContentTypes(ctXml, zip) {
+        const defaultsToAdd = [
+            '<Default Extension="png" ContentType="image/png"/>',
+            '<Default Extension="jpeg" ContentType="image/jpeg"/>',
+            '<Default Extension="jpg" ContentType="image/jpeg"/>',
+            '<Default Extension="gif" ContentType="image/gif"/>',
+            '<Default Extension="emf" ContentType="image/x-emf"/>',
+            '<Default Extension="wmf" ContentType="image/x-wmf"/>',
+            '<Default Extension="svg" ContentType="image/svg+xml"/>',
+            '<Default Extension="tif" ContentType="image/tiff"/>',
+            '<Default Extension="tiff" ContentType="image/tiff"/>'
+        ];
+        defaultsToAdd.forEach(def => {
+            const extMatch = def.match(/Extension="([^"]+)"/);
+            if (extMatch && !ctXml.includes(`Extension="${extMatch[1]}"`)) {
+                ctXml = ctXml.replace('</Types>', `  ${def}\n</Types>`);
+            }
+        });
+
+        if (zip.file('word/numbering.xml') && !ctXml.includes('PartName="/word/numbering.xml"')) {
+            ctXml = ctXml.replace('</Types>', '  <Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>\n</Types>');
+        }
+        return ctXml;
+    }
+
+    function buildCoverPageXml(info) {
+        if (!info || !info.enabled) return '';
+
+        const getField = (key, fallbackVal, fallbackLabel) => {
+            if (info[key] && typeof info[key] === 'object') {
+                return {
+                    enabled: info[key].enabled !== false,
+                    value: (info[key].value !== undefined ? info[key].value : (fallbackVal || '')).trim(),
+                    label: (info[key].label !== undefined ? info[key].label : (fallbackLabel || '')).trim()
+                };
+            }
+            const val = (info[key] !== undefined ? String(info[key]) : (fallbackVal || '')).trim();
+            return {
+                enabled: !!val,
+                value: val,
+                label: (fallbackLabel || '').trim()
+            };
+        };
+
+        const parentOrg = getField('parentOrg', 'ỦY BAN NHÂN DÂN PHƯỜNG TRUNG NHỨT');
+        const schoolName = getField('schoolName', 'TRƯỜNG TIỂU HỌC TRUNG NHỨT');
+        const title = getField('title', 'KẾ HOẠCH BÀI DẠY');
+        const subtitle = getField('subtitle', info.subTitle || 'LỚP 5A2');
+        const teacher = getField('teacher', info.teacherName || 'Phan Thái Châu', 'Giáo viên:');
+        const className = getField('className', '5A2', 'Lớp:');
+        const schoolYear = getField('schoolYear', '2026 - 2027', 'Năm học:');
+        const bottomLoc = getField('bottomLocation', 'NĂM HỌC 2026 - 2027');
+
+        let topXml = '';
+        if (parentOrg.enabled && parentOrg.value) {
+            topXml += `
+            <w:p>
+                <w:pPr>
+                    <w:jc w:val="center"/>
+                    <w:spacing w:before="300" w:after="80" w:line="260" w:lineRule="auto"/>
+                </w:pPr>
+                <w:r>
+                    <w:rPr>
+                        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+                        <w:b/>
+                        <w:sz w:val="26"/>
+                        <w:szCs w:val="26"/>
+                        <w:color w:val="1E293B"/>
+                    </w:rPr>
+                    <w:t>${escapeXml(parentOrg.value.toUpperCase())}</w:t>
+                </w:r>
+            </w:p>`;
+        }
+        if (schoolName.enabled && schoolName.value) {
+            topXml += `
+            <w:p>
+                <w:pPr>
+                    <w:jc w:val="center"/>
+                    <w:spacing w:before="0" w:after="160" w:line="260" w:lineRule="auto"/>
+                </w:pPr>
+                <w:r>
+                    <w:rPr>
+                        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+                        <w:b/>
+                        <w:sz w:val="28"/>
+                        <w:szCs w:val="28"/>
+                        <w:color w:val="1E293B"/>
+                    </w:rPr>
+                    <w:t>${escapeXml(schoolName.value.toUpperCase())}</w:t>
+                </w:r>
+            </w:p>`;
+        }
+        if ((parentOrg.enabled && parentOrg.value) || (schoolName.enabled && schoolName.value)) {
+            topXml += `
+            <w:p>
+                <w:pPr>
+                    <w:jc w:val="center"/>
+                    <w:spacing w:before="0" w:after="1000"/>
+                </w:pPr>
+                <w:r>
+                    <w:rPr>
+                        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+                        <w:b/>
+                        <w:sz w:val="24"/>
+                        <w:color w:val="64748B"/>
+                    </w:rPr>
+                    <w:t>*** -------------------- ***</w:t>
+                </w:r>
+            </w:p>`;
+        }
+
+        let midXml = '';
+        if (title.enabled && title.value) {
+            midXml += `
+            <w:p>
+                <w:pPr>
+                    <w:jc w:val="center"/>
+                    <w:spacing w:before="800" w:after="300" w:line="360" w:lineRule="auto"/>
+                </w:pPr>
+                <w:r>
+                    <w:rPr>
+                        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+                        <w:b/>
+                        <w:sz w:val="56"/>
+                        <w:szCs w:val="56"/>
+                        <w:color w:val="0F172A"/>
+                    </w:rPr>
+                    <w:t>${escapeXml(title.value.toUpperCase())}</w:t>
+                </w:r>
+            </w:p>`;
+        }
+        if (subtitle.enabled && subtitle.value) {
+            midXml += `
+            <w:p>
+                <w:pPr>
+                    <w:jc w:val="center"/>
+                    <w:spacing w:before="100" w:after="300"/>
+                </w:pPr>
+                <w:r>
+                    <w:rPr>
+                        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+                        <w:b/>
+                        <w:sz w:val="36"/>
+                        <w:szCs w:val="36"/>
+                        <w:color w:val="1E3A8A"/>
+                    </w:rPr>
+                    <w:t>${escapeXml(subtitle.value.toUpperCase())}</w:t>
+                </w:r>
+            </w:p>`;
+        }
+        if (title.enabled && title.value) {
+            midXml += `
+            <w:p>
+                <w:pPr>
+                    <w:jc w:val="center"/>
+                    <w:spacing w:before="400" w:after="1400"/>
+                </w:pPr>
+                <w:r>
+                    <w:rPr>
+                        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+                        <w:sz w:val="36"/>
+                        <w:color w:val="3B82F6"/>
+                    </w:rPr>
+                    <w:t>✦ ✧ ✦</w:t>
+                </w:r>
+            </w:p>`;
+        }
+
+        // Standard & Custom Info Lines
+        const allInfoLines = [];
+        if (teacher.enabled && (teacher.value || teacher.label)) allInfoLines.push(teacher);
+        if (className.enabled && (className.value || className.label)) allInfoLines.push(className);
+        if (schoolYear.enabled && (schoolYear.value || schoolYear.label)) allInfoLines.push(schoolYear);
+
+        if (Array.isArray(info.customLines)) {
+            info.customLines.forEach(c => {
+                if (c.enabled !== false) {
+                    const cVal = (c.value || '').trim();
+                    const cLbl = (c.label || '').trim();
+                    if (cVal || cLbl) {
+                        allInfoLines.push({ value: cVal, label: cLbl });
+                    }
+                }
+            });
+        }
+
+        let infoXml = '';
+        allInfoLines.forEach((line, index) => {
+            const isLast = (index === allInfoLines.length - 1);
+            const afterSpacing = isLast ? '1400' : '140';
+            infoXml += `
+            <w:p>
+                <w:pPr>
+                    <w:ind w:left="2400"/>
+                    <w:spacing w:before="0" w:after="${afterSpacing}" w:line="280" w:lineRule="auto"/>
+                </w:pPr>
+                ${line.label ? `
+                <w:r>
+                    <w:rPr>
+                        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+                        <w:b/>
+                        <w:sz w:val="28"/>
+                        <w:szCs w:val="28"/>
+                        <w:color w:val="1E293B"/>
+                    </w:rPr>
+                    <w:t xml:space="preserve">${escapeXml(line.label + ' ')}</w:t>
+                </w:r>` : ''}
+                ${line.value ? `
+                <w:r>
+                    <w:rPr>
+                        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+                        <w:b/>
+                        <w:sz w:val="28"/>
+                        <w:szCs w:val="28"/>
+                        <w:color w:val="0F172A"/>
+                    </w:rPr>
+                    <w:t>${escapeXml(line.value)}</w:t>
+                </w:r>` : ''}
+            </w:p>`;
+        });
+
+        let bottomXml = '';
+        if (bottomLoc.enabled && bottomLoc.value) {
+            bottomXml += `
+            <w:p>
+                <w:pPr>
+                    <w:jc w:val="center"/>
+                    <w:spacing w:before="1000" w:after="300"/>
+                </w:pPr>
+                <w:r>
+                    <w:rPr>
+                        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+                        <w:b/>
+                        <w:sz w:val="26"/>
+                        <w:szCs w:val="26"/>
+                        <w:color w:val="1E293B"/>
+                    </w:rPr>
+                    <w:t>${escapeXml(bottomLoc.value.toUpperCase())}</w:t>
+                </w:r>
+            </w:p>`;
+        }
+
+        return `
+        <w:tbl>
+            <w:tblPr>
+                <w:tblW w:w="0" w:type="auto"/>
+                <w:jc w:val="center"/>
+                <w:tblBorders>
+                    <w:top w:val="double" w:sz="18" w:space="0" w:color="1A365D"/>
+                    <w:left w:val="double" w:sz="18" w:space="0" w:color="1A365D"/>
+                    <w:bottom w:val="double" w:sz="18" w:space="0" w:color="1A365D"/>
+                    <w:right w:val="double" w:sz="18" w:space="0" w:color="1A365D"/>
+                </w:tblBorders>
+                <w:tblCellMar>
+                    <w:top w:w="720" w:type="dxa"/>
+                    <w:left w:w="850" w:type="dxa"/>
+                    <w:bottom w:w="720" w:type="dxa"/>
+                    <w:right w:w="850" w:type="dxa"/>
+                </w:tblCellMar>
+            </w:tblPr>
+            <w:tblGrid>
+                <w:gridCol w:w="9350"/>
+            </w:tblGrid>
+            <w:tr>
+                <w:trPr>
+                    <w:cantSplit/>
+                </w:trPr>
+                <w:tc>
+                    <w:tcPr>
+                        <w:tcW w:w="9350" w:type="dxa"/>
+                        <w:vAlign w:val="center"/>
+                    </w:tcPr>
+                    ${topXml}
+                    ${midXml}
+                    ${infoXml}
+                    ${bottomXml}
+                </w:tc>
+            </w:tr>
+        </w:tbl>
+        <w:p><w:r><w:br w:type="page"/></w:r></w:p>
+        `;
+    }
+
     function buildSignatureXml(sigInfo) {
         if (!sigInfo || !sigInfo.enabled || sigInfo.layout === 'none') return '';
         const placeDate = sigInfo.placeDate || "Trung Nhứt, ngày     tháng     năm 202...";
@@ -1420,19 +2545,51 @@ document.addEventListener('DOMContentLoaded', () => {
         return body;
     }
 
-    // Ghép tài liệu Word an toàn tuyệt đối, hỗ trợ cả 1 môn và nhiều môn
+    // Ghép tài liệu Word an toàn tuyệt đối, hỗ trợ cả 1 môn và nhiều môn (Chuẩn OpenXML ISO/IEC 29500)
     async function mergeWordDocuments(buffers, options = {}) {
-        const { pageBreak = true, continuousPage = true, sigInfo = null } = options;
+        const {
+            pageBreak = true,
+            continuousPage = true,
+            sigInfo = null,
+            coverInfo = null
+        } = options;
         if (!buffers || buffers.length === 0) throw new Error('Không có file nào để ghép');
 
         const PAGE_BREAK_XML = '<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
+        const coverXml = (coverInfo && coverInfo.enabled) ? buildCoverPageXml(coverInfo) : '';
         const sigXml = (sigInfo && sigInfo.enabled) ? buildSignatureXml(sigInfo) : '';
+
+        // Lập bản đồ namespace tổng hợp từ tất cả buffers + standard
+        const allNamespaces = Object.assign({}, standardNamespaces);
+        for (const buf of buffers) {
+            try {
+                const z = await JSZip.loadAsync(buf);
+                const dXml = await z.file('word/document.xml').async('string');
+                const rootSub = dXml.substring(0, dXml.indexOf('<w:body>'));
+                const nsRegex = /xmlns:([a-zA-Z0-9_\-]+)="([^"]+)"/g;
+                let m;
+                while ((m = nsRegex.exec(rootSub)) !== null) {
+                    allNamespaces[m[1]] = m[2];
+                }
+            } catch (_) {}
+        }
 
         // Trường hợp 1 file duy nhất (ghép 1 môn cho tuần):
         if (buffers.length === 1) {
             const zip = await JSZip.loadAsync(buffers[0]);
             let docXml = await zip.file('word/document.xml').async('string');
 
+            // Bổ sung đầy đủ namespace tránh lỗi prefix undeclared
+            const bodyStart = docXml.indexOf('<w:body>');
+            docXml = buildRootDocumentTag(allNamespaces) + docXml.substring(bodyStart);
+
+            // Chèn trang bìa nếu có
+            if (coverXml) {
+                const bodyIdx = docXml.indexOf('<w:body>') + '<w:body>'.length;
+                docXml = docXml.substring(0, bodyIdx) + coverXml + docXml.substring(bodyIdx);
+            }
+
+            // Chèn khối chữ ký nếu có
             if (sigXml) {
                 const bodyEnd = docXml.lastIndexOf('</w:body>');
                 const lastSect = docXml.lastIndexOf('<w:sectPr');
@@ -1454,11 +2611,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 docXml = docXml.replace(/(<w:pgNumType\b[^>]*?)\s+w:start="[^"]*"/gi, '$1');
             }
 
+            // Fix [Content_Types].xml
+            let ctXml = await zip.file('[Content_Types].xml').async('string');
+            ctXml = fixContentTypes(ctXml, zip);
+            zip.file('[Content_Types].xml', ctXml);
+
             zip.file('word/document.xml', docXml);
             return await zip.generateAsync({ type: 'uint8array' });
         }
 
-        // Trường hợp nhiều môn: lấy file đầu tiên làm template gốc
+        // Trường hợp nhiều file: lấy file đầu tiên làm template gốc
         const baseZip = await JSZip.loadAsync(buffers[0]);
         let baseDocXml = await baseZip.file('word/document.xml').async('string');
 
@@ -1573,7 +2735,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            const nextBody = extractBodyContent(nextDocXml);
+            let nextBody = extractBodyContent(nextDocXml);
+            // Bỏ header/footer reference rời rạc ở giữa các file tránh lỗi
+            nextBody = nextBody.replace(/<w:headerReference\b[^>]*\/>/gi, '');
+            nextBody = nextBody.replace(/<w:footerReference\b[^>]*\/>/gi, '');
 
             if (pageBreak) {
                 combinedBody += PAGE_BREAK_XML;
@@ -1585,17 +2750,27 @@ document.addEventListener('DOMContentLoaded', () => {
             baseZip.file('word/_rels/document.xml.rels', baseRelsXml);
         }
 
+        // Bổ sung Cover Page nếu có
+        if (coverXml) {
+            combinedBody = coverXml + combinedBody;
+        }
+
+        // Bổ sung Signature nếu có
         if (sigXml) {
             combinedBody += sigXml;
         }
 
-        const bodyStartIdx = baseDocXml.indexOf('<w:body>');
-        const docHeader = baseDocXml.substring(0, bodyStartIdx + 8);
+        const docHeader = buildRootDocumentTag(allNamespaces) + '<w:body>';
         let finalDocXml = docHeader + combinedBody + finalSectPr + '</w:body></w:document>';
 
         if (continuousPage) {
             finalDocXml = finalDocXml.replace(/(<w:pgNumType\b[^>]*?)\s+w:start="[^"]*"/gi, '$1');
         }
+
+        // Fix [Content_Types].xml
+        let ctXml = await baseZip.file('[Content_Types].xml').async('string');
+        ctXml = fixContentTypes(ctXml, baseZip);
+        baseZip.file('[Content_Types].xml', ctXml);
 
         baseZip.file('word/document.xml', finalDocXml);
         return await baseZip.generateAsync({ type: 'uint8array' });
@@ -1635,13 +2810,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Làm mờ và khóa cả 2 nút ghép tài liệu khi đang chạy
+        // Khóa và làm mờ cả 2 nút ghép khi đang chạy
         setGiaoAnButtonsLoading(true);
 
         try {
-            // Chuyển sang tab tiến trình
             switchTab('tab-process');
             if (completionBannerBox) completionBannerBox.classList.add('hidden');
+            if (btnExportSingleDocx) btnExportSingleDocx.classList.add('hidden');
 
             if (executionLogConsole) {
                 executionLogConsole.innerHTML = '';
@@ -1650,13 +2825,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (progressBarFill) progressBarFill.style.width = '0%';
             if (progressPercentVal) progressPercentVal.textContent = '0%';
             if (progressStatusMsg) progressStatusMsg.textContent = 'Đang khởi động ghép tài liệu...';
-            appendLog(`Khởi động ghép tài liệu cho ${state.selectedWeeks.size} tuần được chọn...`, 'info');
 
             state.mergedResults = {};
             const weeksArray = Array.from(state.selectedWeeks).sort((a, b) => a - b);
             const totalWeeks = weeksArray.length;
-            let processedWeeks = 0;
-            let successCount = 0;
 
             const sigInfo = {
                 enabled: chkEnableSignature ? chkEnableSignature.checked : false,
@@ -1670,94 +2842,286 @@ document.addEventListener('DOMContentLoaded', () => {
                 gvName: sigGvName ? sigGvName.value.trim() : ''
             };
 
+            const coverInfo = getCoverInfo();
+
             const tengv = (inputTenGv ? inputTenGv.value.trim() : '') || 'Chau';
             const pattern = (inputNamingPattern ? inputNamingPattern.value.trim() : '') || '{tengv}_KHBD_Tuan_{week}_Lop_{lop}.docx';
+            const bundlePattern = (inputBundlePattern ? inputBundlePattern.value.trim() : '') || '{tengv}_KHBD_Tuan_{min_week}_den_{max_week}_Lop_{lop}.docx';
             const lop = (inputLopName ? inputLopName.value.trim() : '') || '5';
             const pageBreak = chkPageBreak ? chkPageBreak.checked : true;
             const continuousPage = chkContinuousPage ? chkContinuousPage.checked : true;
 
-            for (const week of weeksArray) {
-                const weekPad = week < 10 ? '0' + week : String(week);
-                if (progressStatusMsg) progressStatusMsg.textContent = `Đang ghép Tuần ${weekPad}...`;
-                appendLog(`--- Xử lý Tuần ${weekPad} ---`, 'info');
-
-                const wFilesMap = (state.weeksMap[week] && state.weeksMap[week].files) || {};
-                const filesToMerge = [];
-                const subjectsFound = [];
-
-                for (const subName of enabledSubjectNames) {
-                    const subFiles = wFilesMap[subName];
-                    if (subFiles) {
-                        if (Array.isArray(subFiles)) {
-                            filesToMerge.push(...subFiles);
-                            subjectsFound.push(subName + (subFiles.length > 1 ? ` (${subFiles.length} tiết)` : ''));
-                        } else {
-                            filesToMerge.push(subFiles);
-                            subjectsFound.push(subName);
-                        }
-                    }
+            if (state.exportMode === 'bundle') {
+                // ==============================================================
+                // BẢN V3: CHẾ ĐỘ GỘP NHIỀU TUẦN THÀNH 1 FILE DUY NHẤT
+                // ==============================================================
+                appendLog(`[BẢN V3] Bắt đầu gộp ${totalWeeks} tuần thành 1 FILE DUY NHẤT...`, 'info');
+                if (coverInfo.enabled) {
+                    appendLog(`✓ Trang bìa: ĐÃ BẬT ("${coverInfo.title}" - GV: ${coverInfo.teacherName})`, 'info');
+                } else {
+                    appendLog(`- Trang bìa: Không kích hoạt`, 'info');
                 }
 
-                if (filesToMerge.length === 0) {
-                    appendLog(`Tuần ${weekPad}: Không tìm thấy file môn học nào, bỏ qua.`, 'warn');
+                const minW = weeksArray[0];
+                const maxW = weeksArray[weeksArray.length - 1];
+                const minWPad = minW < 10 ? '0' + minW : String(minW);
+                const maxWPad = maxW < 10 ? '0' + maxW : String(maxW);
+
+                let bundleFileName = bundlePattern
+                    .replace(/\{tengv\}/gi, tengv)
+                    .replace(/\{min_week\}/gi, minWPad)
+                    .replace(/\{max_week\}/gi, maxWPad)
+                    .replace(/\{min_w\}/gi, String(minW))
+                    .replace(/\{max_w\}/gi, String(maxW))
+                    .replace(/\{count_weeks\}/gi, String(totalWeeks))
+                    .replace(/\{lop\}/gi, lop);
+                if (!bundleFileName.toLowerCase().endsWith('.docx')) bundleFileName += '.docx';
+                bundleFileName = bundleFileName.replace(/[<>:"/\\|?*]/g, '_');
+
+                if (state.bundleSigPos === 'each') {
+                    // Chữ ký đặt ở CUỐI MỖI TUẦN: ghép từng tuần (có chữ ký tuần), sau đó nối lại kèm bìa
+                    appendLog(`Chế độ chữ ký: Đặt ở CUỐI MỖI TUẦN (${totalWeeks} khối chữ ký)`, 'info');
+                    const weeklyMergedBuffers = [];
+
+                    for (let idx = 0; idx < totalWeeks; idx++) {
+                        const week = weeksArray[idx];
+                        const weekPad = week < 10 ? '0' + week : String(week);
+                        if (progressStatusMsg) progressStatusMsg.textContent = `Đang xử lý Tuần ${weekPad} (${idx + 1}/${totalWeeks})...`;
+
+                        const wFilesMap = (state.weeksMap[week] && state.weeksMap[week].files) || {};
+                        const filesToMerge = [];
+                        for (const subName of enabledSubjectNames) {
+                            const subFiles = wFilesMap[subName];
+                            if (subFiles) {
+                                if (Array.isArray(subFiles)) filesToMerge.push(...subFiles);
+                                else filesToMerge.push(subFiles);
+                            }
+                        }
+
+                        if (filesToMerge.length === 0) {
+                            appendLog(`Tuần ${weekPad}: Không có file nào, bỏ qua.`, 'warn');
+                            continue;
+                        }
+
+                        appendLog(`Tuần ${weekPad}: Chuẩn bị ${filesToMerge.length} file môn học...`, 'info');
+                        const wBuffers = [];
+                        for (const f of filesToMerge) {
+                            wBuffers.push(await f.arrayBuffer());
+                        }
+
+                        const wBytes = await mergeWordDocuments(wBuffers, {
+                            pageBreak: pageBreak,
+                            continuousPage: continuousPage,
+                            sigInfo: sigInfo,
+                            coverInfo: null
+                        });
+                        weeklyMergedBuffers.push(wBytes);
+
+                        const pct = Math.round(((idx + 1) / totalWeeks) * 85);
+                        if (progressBarFill) progressBarFill.style.width = pct + '%';
+                        if (progressPercentVal) progressPercentVal.textContent = pct + '%';
+                    }
+
+                    if (weeklyMergedBuffers.length === 0) {
+                        throw new Error('Không tìm thấy tài liệu nào trong các tuần đã chọn!');
+                    }
+
+                    if (progressStatusMsg) progressStatusMsg.textContent = 'Đang gộp tất cả các tuần thành 1 file hoàn chỉnh...';
+                    appendLog(`Đang liên kết tất cả các tuần thành file "${bundleFileName}"...`, 'info');
+
+                    const finalBundleBytes = await mergeWordDocuments(weeklyMergedBuffers, {
+                        pageBreak: pageBreak,
+                        continuousPage: continuousPage,
+                        sigInfo: null, // Đã có trong từng tuần
+                        coverInfo: coverInfo
+                    });
+
+                    state.mergedResults[bundleFileName] = finalBundleBytes;
+
+                } else {
+                    // Chữ ký đặt DUY NHẤT Ở CUỐI TOÀN BỘ FILE GỘP (mặc định)
+                    appendLog(`Chế độ chữ ký: Đặt DUY NHẤT ở cuối toàn bộ file gộp`, 'info');
+                    const allFilesOverall = [];
+
+                    for (let idx = 0; idx < totalWeeks; idx++) {
+                        const week = weeksArray[idx];
+                        const weekPad = week < 10 ? '0' + week : String(week);
+                        if (progressStatusMsg) progressStatusMsg.textContent = `Đang đọc tài liệu Tuần ${weekPad} (${idx + 1}/${totalWeeks})...`;
+
+                        const wFilesMap = (state.weeksMap[week] && state.weeksMap[week].files) || {};
+                        const filesToMerge = [];
+                        for (const subName of enabledSubjectNames) {
+                            const subFiles = wFilesMap[subName];
+                            if (subFiles) {
+                                if (Array.isArray(subFiles)) filesToMerge.push(...subFiles);
+                                else filesToMerge.push(subFiles);
+                            }
+                        }
+
+                        if (filesToMerge.length === 0) {
+                            appendLog(`Tuần ${weekPad}: Không có file nào, bỏ qua.`, 'warn');
+                            continue;
+                        }
+
+                        appendLog(`Tuần ${weekPad}: Gom ${filesToMerge.length} file môn học.`, 'info');
+                        for (const f of filesToMerge) {
+                            allFilesOverall.push(f);
+                        }
+
+                        const pct = Math.round(((idx + 1) / totalWeeks) * 60);
+                        if (progressBarFill) progressBarFill.style.width = pct + '%';
+                        if (progressPercentVal) progressPercentVal.textContent = pct + '%';
+                    }
+
+                    if (allFilesOverall.length === 0) {
+                        throw new Error('Không tìm thấy tài liệu nào trong các tuần đã chọn!');
+                    }
+
+                    appendLog(`Tổng cộng gom được ${allFilesOverall.length} file môn học từ ${totalWeeks} tuần. Bắt đầu ghép...`, 'info');
+                    const allBuffers = [];
+                    for (let i = 0; i < allFilesOverall.length; i++) {
+                        const f = allFilesOverall[i];
+                        allBuffers.push(await f.arrayBuffer());
+                        const pct = 60 + Math.round(((i + 1) / allFilesOverall.length) * 30);
+                        if (progressBarFill) progressBarFill.style.width = pct + '%';
+                        if (progressPercentVal) progressPercentVal.textContent = pct + '%';
+                    }
+
+                    if (progressStatusMsg) progressStatusMsg.textContent = 'Đang xử lý chuẩn OpenXML và hoàn tất file gộp...';
+                    const finalBundleBytes = await mergeWordDocuments(allBuffers, {
+                        pageBreak: pageBreak,
+                        continuousPage: continuousPage,
+                        sigInfo: sigInfo,
+                        coverInfo: coverInfo
+                    });
+
+                    state.mergedResults[bundleFileName] = finalBundleBytes;
+                }
+
+                if (progressBarFill) progressBarFill.style.width = '100%';
+                if (progressPercentVal) progressPercentVal.textContent = '100%';
+                if (progressStatusMsg) progressStatusMsg.textContent = 'Hoàn tất gộp giáo án nhiều tuần!';
+                appendLog(`🎉 THÀNH CÔNG RỰC RỠ: Đã gộp ${totalWeeks} tuần vào 1 FILE DUY NHẤT: "${bundleFileName}" (${formatFileSize(state.mergedResults[bundleFileName].byteLength)})`, 'success');
+
+                if (completionDescText) {
+                    completionDescText.textContent = `Đã gộp thành công ${totalWeeks} tuần (từ Tuần ${minWPad} đến Tuần ${maxWPad}) vào 1 FILE DUY NHẤT: "${bundleFileName}". Thầy/Cô có thể tải trực tiếp file Word này về máy tính.`;
+                }
+                if (btnExportSingleDocx) {
+                    btnExportSingleDocx.classList.remove('hidden');
+                    if (btnExportSingleLabel) {
+                        btnExportSingleLabel.textContent = `Tải Về File Word Gộp: ${bundleFileName}`;
+                    }
+                }
+                if (completionBannerBox) completionBannerBox.classList.remove('hidden');
+                showToast(`🎉 Gộp thành công ${totalWeeks} tuần thành 1 file Word!`, 'success');
+
+            } else {
+                // ==============================================================
+                // CHẾ ĐỘ XUẤT RIÊNG TỪNG TUẦN (MẶC ĐỊNH)
+                // ==============================================================
+                appendLog(`Khởi động ghép tài liệu cho ${totalWeeks} tuần được chọn (chế độ xuất riêng từng tuần)...`, 'info');
+                if (coverInfo.enabled) {
+                    appendLog(`✓ Trang bìa: ĐÃ BẬT cho từng tuần`, 'info');
+                }
+                let processedWeeks = 0;
+                let successCount = 0;
+
+                for (const week of weeksArray) {
+                    const weekPad = week < 10 ? '0' + week : String(week);
+                    if (progressStatusMsg) progressStatusMsg.textContent = `Đang ghép Tuần ${weekPad}...`;
+                    appendLog(`--- Xử lý Tuần ${weekPad} ---`, 'info');
+
+                    const wFilesMap = (state.weeksMap[week] && state.weeksMap[week].files) || {};
+                    const filesToMerge = [];
+                    const subjectsFound = [];
+
+                    for (const subName of enabledSubjectNames) {
+                        const subFiles = wFilesMap[subName];
+                        if (subFiles) {
+                            if (Array.isArray(subFiles)) {
+                                filesToMerge.push(...subFiles);
+                                subjectsFound.push(subName + (subFiles.length > 1 ? ` (${subFiles.length} tiết)` : ''));
+                            } else {
+                                filesToMerge.push(subFiles);
+                                subjectsFound.push(subName);
+                            }
+                        }
+                    }
+
+                    if (filesToMerge.length === 0) {
+                        appendLog(`Tuần ${weekPad}: Không tìm thấy file môn học nào, bỏ qua.`, 'warn');
+                        processedWeeks++;
+                        const pct = Math.round((processedWeeks / totalWeeks) * 100);
+                        if (progressBarFill) progressBarFill.style.width = pct + '%';
+                        if (progressPercentVal) progressPercentVal.textContent = pct + '%';
+                        continue;
+                    }
+
+                    appendLog(`Tuần ${weekPad}: Gom ${filesToMerge.length} file môn học (${subjectsFound.join(', ')})`, 'info');
+
+                    try {
+                        const buffers = [];
+                        for (const f of filesToMerge) {
+                            const buf = await f.arrayBuffer();
+                            buffers.push(buf);
+                        }
+
+                        // Ghép tài liệu Word an toàn qua lõi OpenXML chuẩn
+                        const mergedBytes = await mergeWordDocuments(buffers, {
+                            pageBreak: pageBreak,
+                            continuousPage: continuousPage,
+                            sigInfo: sigInfo,
+                            coverInfo: coverInfo
+                        });
+
+                        let outFileName = pattern
+                            .replace(/\{tengv\}/gi, tengv)
+                            .replace(/\{week\}/g, weekPad)
+                            .replace(/\{w\}/g, String(week))
+                            .replace(/\{lop\}/g, lop)
+                            .replace(/\{mon\}/g, subjectsFound.length === 1 ? subjectsFound[0].replace(/\s*\(\d+\s*tiết\)/g, '') : 'Tong_Hop');
+                        if (!outFileName.toLowerCase().endsWith('.docx')) outFileName += '.docx';
+                        outFileName = outFileName.replace(/[<>:"/\\|?*]/g, '_');
+
+                        state.mergedResults[outFileName] = mergedBytes;
+                        successCount++;
+                        appendLog(`✓ Ghép thành công Tuần ${weekPad} -> ${outFileName}`, 'success');
+                    } catch (err) {
+                        console.error(err);
+                        appendLog(`✕ Lỗi khi ghép Tuần ${weekPad}: ${err.message || err}`, 'error');
+                    }
+
                     processedWeeks++;
                     const pct = Math.round((processedWeeks / totalWeeks) * 100);
                     if (progressBarFill) progressBarFill.style.width = pct + '%';
                     if (progressPercentVal) progressPercentVal.textContent = pct + '%';
-                    continue;
                 }
 
-                appendLog(`Tuần ${weekPad}: Gom ${filesToMerge.length} file môn học (${subjectsFound.join(', ')})`, 'info');
+                if (progressStatusMsg) progressStatusMsg.textContent = 'Hoàn tất ghép tài liệu!';
+                appendLog(`🎉 TỔNG KẾT: Đã ghép thành công ${successCount} / ${totalWeeks} tuần được chọn.`, 'success');
 
-                try {
-                    const buffers = [];
-                    for (const f of filesToMerge) {
-                        const buf = await f.arrayBuffer();
-                        buffers.push(buf);
+                if (successCount > 0) {
+                    if (completionDescText) {
+                        completionDescText.textContent = `Đã ghép thành công ${successCount} file Word theo tuần. Thầy/Cô có thể tải file ZIP hoặc lưu trực tiếp vào thư mục trên máy tính.`;
                     }
-
-                    // Ghép tài liệu Word an toàn qua lõi OpenXML chuẩn
-                    const mergedBytes = await mergeWordDocuments(buffers, {
-                        pageBreak: pageBreak,
-                        continuousPage: continuousPage,
-                        sigInfo: sigInfo
-                    });
-
-                    let outFileName = pattern
-                        .replace(/\{tengv\}/gi, tengv)
-                        .replace(/\{week\}/g, weekPad)
-                        .replace(/\{w\}/g, String(week))
-                        .replace(/\{lop\}/g, lop)
-                        .replace(/\{mon\}/g, subjectsFound.length === 1 ? subjectsFound[0].replace(/\s*\(\d+\s*tiết\)/g, '') : 'Tong_Hop');
-                    if (!outFileName.toLowerCase().endsWith('.docx')) outFileName += '.docx';
-                    outFileName = outFileName.replace(/[<>:"/\\|?*]/g, '_');
-
-                    state.mergedResults[outFileName] = mergedBytes;
-                    successCount++;
-                    appendLog(`✓ Ghép thành công Tuần ${weekPad} -> ${outFileName}`, 'success');
-                } catch (err) {
-                    console.error(err);
-                    appendLog(`✕ Lỗi khi ghép Tuần ${weekPad}: ${err.message || err}`, 'error');
+                    if (btnExportSingleDocx) {
+                        if (successCount === 1) {
+                            const singleName = Object.keys(state.mergedResults)[0];
+                            btnExportSingleDocx.classList.remove('hidden');
+                            if (btnExportSingleLabel) btnExportSingleLabel.textContent = `Tải Về: ${singleName}`;
+                        } else {
+                            btnExportSingleDocx.classList.add('hidden');
+                        }
+                    }
+                    if (completionBannerBox) completionBannerBox.classList.remove('hidden');
+                    showToast(`🎉 Ghép hoàn tất ${successCount} file tuần thành công!`);
                 }
-
-                processedWeeks++;
-                const pct = Math.round((processedWeeks / totalWeeks) * 100);
-                if (progressBarFill) progressBarFill.style.width = pct + '%';
-                if (progressPercentVal) progressPercentVal.textContent = pct + '%';
             }
-
-            if (progressStatusMsg) progressStatusMsg.textContent = 'Hoàn tất ghép tài liệu!';
-            appendLog(`🎉 TỔNG KẾT: Đã ghép thành công ${successCount} / ${totalWeeks} tuần được chọn.`, 'success');
-
-            if (successCount > 0) {
-                if (completionDescText) {
-                    completionDescText.textContent = `Đã ghép thành công ${successCount} file Word theo tuần. Thầy/Cô có thể tải file ZIP hoặc lưu trực tiếp vào thư mục trên máy tính.`;
-                }
-                if (completionBannerBox) completionBannerBox.classList.remove('hidden');
-                showToast(`🎉 Ghép hoàn tất ${successCount} file tuần thành công!`);
-            }
+        } catch (globalErr) {
+            console.error(globalErr);
+            appendLog(`✕ Lỗi khi thực hiện ghép: ${globalErr.message || globalErr}`, 'error');
+            showToast('Lỗi khi ghép: ' + (globalErr.message || globalErr), 'error');
         } finally {
-            // Khôi phục trạng thái cả 2 nút bấm khi hoàn tất hoặc lỗi
             setGiaoAnButtonsLoading(false);
         }
     }
@@ -1766,8 +3130,31 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnStartMergeBottom) btnStartMergeBottom.addEventListener('click', executeGiaoAnMerge);
 
     // ==========================================================================
-    // Xuất file: Tải ZIP & Lưu thư mục
+    // Xuất file: Tải ZIP, Tải 1 file Word trực tiếp & Lưu thư mục
     // ==========================================================================
+    if (btnExportSingleDocx) {
+        btnExportSingleDocx.addEventListener('click', () => {
+            const fileNames = Object.keys(state.mergedResults);
+            if (fileNames.length === 0) {
+                alert('Chưa có file nào được ghép!');
+                return;
+            }
+            const fname = fileNames[0];
+            const bytes = state.mergedResults[fname];
+            const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fname;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            appendLog(`✓ Đã tải xuống trực tiếp file: ${fname}`, 'success');
+            showToast(`✓ Đã tải xuống file: ${fname}`, 'success');
+        });
+    }
+
     btnExportZip.addEventListener('click', async () => {
         const fileNames = Object.keys(state.mergedResults);
         if (fileNames.length === 0) {
@@ -2235,11 +3622,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const pageBreak = chkFreePageBreak ? chkFreePageBreak.checked : true;
                 const continuousPage = chkFreeContinuousPage ? chkFreeContinuousPage.checked : true;
+                const freeCoverInfo = (chkFreeEnableCover && chkFreeEnableCover.checked) ? getCoverInfo() : null;
+                if (freeCoverInfo && freeCoverInfo.enabled) {
+                    appendFreeLog(`✓ Trang bìa: ĐÃ BẬT ("${freeCoverInfo.title}" - GV: ${freeCoverInfo.teacherName})`, 'info');
+                } else {
+                    appendFreeLog(`- Trang bìa: Không kích hoạt`, 'info');
+                }
 
                 const mergedBytes = await mergeWordDocuments(buffers, {
                     pageBreak: pageBreak,
                     continuousPage: continuousPage,
-                    sigInfo: sigInfo
+                    sigInfo: sigInfo,
+                    coverInfo: freeCoverInfo
                 });
 
                 updateFreeNamingPreview();

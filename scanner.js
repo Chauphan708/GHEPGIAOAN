@@ -30,8 +30,8 @@ function canonicalSubject(folderName) {
 
 function extractWeekNumber(filename) {
     const patterns = [
-        /(?:tu[aàầáảãạ]n|tuan|week|w|t)[\s_\-\.]*0*([12]\d|3[0-5]|[1-9])\b/i,
-        /[_\-\.]0*([12]\d|3[0-5]|[1-9])[_\-\.]/,
+        /(?:tu[aàầáảãạ]n|tuan|week|w|t)[\s_.-]*0*([12]\d|3[0-5]|[1-9])(?=[^\d]|$)/i,
+        /[-_.]0*([12]\d|3[0-5]|[1-9])[-_.]/,
         /\b0*([12]\d|3[0-5]|[1-9])\.(?:docx|doc)$/i
     ];
 

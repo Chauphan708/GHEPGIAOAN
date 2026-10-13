@@ -1639,6 +1639,222 @@ body {
     border-color: #fca5a5;
 }
 
+/* ==========================================================================
+   Chế độ ghép & Xuất file (Bản V3)
+   ========================================================================== */
+.export-mode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+}
+
+.export-mode-card {
+    border: 1.5px solid var(--border-card);
+    border-radius: var(--radius-md);
+    background: #ffffff;
+    padding: 1rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    user-select: none;
+}
+
+.export-mode-card:hover {
+    border-color: var(--primary-border);
+    background: #f8fafc;
+}
+
+.export-mode-card.active {
+    border-color: var(--primary);
+    background: #eff6ff;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.export-mode-radio {
+    margin-top: 0.2rem;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+}
+
+.export-mode-info {
+    flex: 1;
+}
+
+.export-mode-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-title);
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.export-mode-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.bundle-options-box {
+    background: #f8fafc;
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+/* ==========================================================================
+   Cấu hình Trang Bìa Giáo Án / Hồ Sơ (Bản V3)
+   ========================================================================== */
+.cover-layout-container {
+    display: grid;
+    grid-template-columns: 1fr 310px;
+    gap: 1.25rem;
+    margin-top: 1rem;
+}
+
+@media (max-width: 900px) {
+    .cover-layout-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.cover-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem;
+}
+
+@media (max-width: 600px) {
+    .cover-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.cover-preview-wrapper {
+    background: #f8fafc;
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cover-preview-header {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.cover-preview-sheet {
+    width: 250px;
+    min-height: 350px;
+    background: #ffffff;
+    border: 3px double #1e3a8a;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    padding: 0.9rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    font-family: "Times New Roman", Times, serif;
+    overflow: hidden;
+    position: relative;
+}
+
+.cover-prev-top {
+    font-size: 0.55rem;
+    line-height: 1.25;
+    color: #1e293b;
+}
+
+.cover-prev-parent {
+    font-weight: 700;
+    font-size: 0.52rem;
+}
+
+.cover-prev-school {
+    font-weight: 700;
+    font-size: 0.58rem;
+    margin-top: 2px;
+}
+
+.cover-prev-sep {
+    font-size: 0.5rem;
+    color: #64748b;
+    margin: 4px 0;
+}
+
+.cover-prev-mid {
+    margin: auto 0;
+    padding: 0.5rem 0;
+}
+
+.cover-prev-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.2;
+}
+
+.cover-prev-subtitle {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-top: 3px;
+}
+
+.cover-prev-deco {
+    font-size: 0.65rem;
+    color: #3b82f6;
+    margin: 4px 0;
+}
+
+.cover-prev-bottom-info {
+    text-align: left;
+    font-size: 0.52rem;
+    margin: 0 auto;
+    width: 85%;
+    line-height: 1.4;
+    color: #1e293b;
+}
+
+.cover-prev-footer {
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 6px;
+}
+
+.btn-download-direct {
+    background: #0284c7;
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition-fast);
+}
+
+.btn-download-direct:hover {
+    background: #0369a1;
+}
+
 .hidden {
     display: none !important;
 }
@@ -1672,4 +1888,134 @@ body {
     .window-header, .nav-tabs, .upload-hero, .execution-bar, .log-console-header, .log-console, .btn-group, .btn-icon, .btn-clear-log, .btn-top-actions {
         display: none !important;
     }
+}
+
+/* ==========================================================================
+   Tùy biến động từng dòng Trang Bìa (Bản V3: Ẩn/Hiện, Thêm, Sửa, Xóa)
+   ========================================================================== */
+.cover-field-card {
+    background: #ffffff;
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 0.65rem 0.75rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.cover-field-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.cover-field-card.is-disabled {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    opacity: 0.62;
+}
+
+.cover-field-card.is-disabled .cover-field-input,
+.cover-field-card.is-disabled .cover-field-label-input {
+    background: #f1f5f9;
+    color: #94a3b8;
+}
+
+.cover-field-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.cover-field-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--text-title);
+    user-select: none;
+}
+
+.cover-field-toggle-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+    cursor: pointer;
+    margin: 0;
+}
+
+.cover-field-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.cover-field-status {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.1rem 0.45rem;
+    border-radius: 9999px;
+    letter-spacing: 0.02em;
+}
+
+.cover-field-status.status-on {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.cover-field-status.status-off {
+    background: #f1f5f9;
+    color: #94a3b8;
+}
+
+.btn-field-del {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 0.2rem 0.35rem;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.btn-field-del:hover {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+.cover-field-body {
+    display: flex;
+    align-items: center;
+}
+
+.cover-field-body-dual {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    width: 100%;
+}
+
+.cover-field-label-input {
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: #334155;
+    background: #f8fafc;
+}
+
+.cover-actions-bar {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--border-card);
+    flex-wrap: wrap;
 }

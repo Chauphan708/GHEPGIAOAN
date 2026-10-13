@@ -1,10 +1,10 @@
 ========================================================================================
-     HƯỚNG DẪN SỬ DỤNG PHẦN MỀM GHÉP GIÁO ÁN / KẾ HOẠCH BÀI DẠY 35 TUẦN (BẢN V2 & HTML5)
+     HƯỚNG DẪN SỬ DỤNG PHẦN MỀM GHÉP GIÁO ÁN / KẾ HOẠCH BÀI DẠY 35 TUẦN (BẢN V3 DESKTOP PRO)
 ========================================================================================
 
 Phần mềm giúp Thầy/Cô tự động gom và ghép các file Word riêng lẻ của từng môn học 
-(Tiếng Việt, Toán, Khoa học, Lịch sử và Địa lí, Đạo đức, Công nghệ, Hoạt động trải nghiệm...)
-thành các file Kế hoạch bài dạy (KHBD) tổng hợp theo từng tuần từ Tuần 1 đến Tuần 35.
+(Tiếng Việt, Toán, Khoa học, Lịch sử và Địa lí, Đạo đức, Công nghệ, Hoạt động trải nghiệm, Lịch báo giảng...)
+thành các file Kế hoạch bài dạy (KHBD) tổng hợp theo từng tuần hoặc gộp nhiều tuần thành 1 FILE DUY NHẤT.
 
 ----------------------------------------------------------------------------------------
 3 CÁCH SỬ DỤNG PHẦN MỀM TIỆN LỢI TÙY NHU CẦU:
@@ -17,7 +17,7 @@ thành các file Kế hoạch bài dạy (KHBD) tổng hợp theo từng tuần 
      + Hoàn toàn KHÔNG CẦN CÀI ĐẶT Node.js hay bất cứ môi trường gì.
      + Có thể copy file HTML5 này vào USB mang sang bất kỳ máy tính nào của đồng nghiệp, máy trường học, máy cá nhân đều dùng được ngay lập tức.
      + Hỗ trợ Kéo - Thả trực tiếp thư mục giáo án vào khung trên màn hình.
-     + Hỗ trợ nút "Tải về file ZIP" trọn bộ 35 tuần và "Lưu trực tiếp vào thư mục máy tính".
+     + Hỗ trợ nút "Tải về file ZIP" trọn bộ 35 tuần, "Tải về file Word (.docx) trực tiếp" và "Lưu trực tiếp vào thư mục máy tính".
 
 ★ CÁCH 2: DÙNG BẢN WEB LOCAL (ĐẦY ĐỦ TÍNH NĂNG VÀ HỖ TRỢ HỆ ĐIỀU HÀNH)
    - Tệp: "Chay_Phan_Mem_Web.bat".
@@ -30,7 +30,39 @@ thành các file Kế hoạch bài dạy (KHBD) tổng hợp theo từng tuần 
    - Ưu điểm: Chỉ cần kéo thư mục giáo án thả thẳng vào tệp .bat, phần mềm sẽ tự động lấy thông tin chữ ký đã lưu và ghép siêu tốc trong vài giây mà không cần mở trình duyệt.
 
 ----------------------------------------------------------------------------------------
-CÁC TÍNH NĂNG NÂNG CẤP V2 VÀ QUY CHUẨN THIẾT KẾ:
+CÁC ĐIỂM NÂNG CẤP ĐỘT PHÁ Ở BẢN V3 (V3.0 DESKTOP PRO):
+----------------------------------------------------------------------------------------
+★ 1. KHẮC PHỤC TRIỆT ĐỂ LỖI KHÔNG MỞ ĐƯỢC FILE KHI GHÉP FILE BẤT KỲ:
+   - Cơ chế tương thích sâu OpenXML ISO/IEC 29500 tự động nhận diện và khai báo đầy đủ 32+ namespace chuẩn Office (wpc, cx, a, pic, wp, w14, w15, w16...) cùng mc:Ignorable.
+   - Bổ sung tự động các định nghĩa kiểu phương tiện hình ảnh (png, jpeg, emf, wmf, svg...) và numbering trong [Content_Types].xml.
+   - Khử sạch các liên kết tiêu đề / chân trang (Header/Footer reference) rời rạc ở giữa tài liệu. Đảm bảo mở bằng Microsoft Word 2013, 2016, 2019, 2021, Office 365 luôn trơn tru 100%, không bao giờ gặp lỗi "found a problem with its contents".
+
+★ 2. TÙY CHỌN BỔ SUNG TRANG BÌA GIÁO ÁN CHUẨN ĐẸP (100% TÙY BIẾN, DỄ CHỈNH SỬA):
+   - Thầy/Cô có thể kích hoạt tùy chọn "Chèn Trang Bìa Giáo Án" với khung viền hoa văn kép đôi trang nhã (double border) chuẩn mực sư phạm.
+   - Dễ dàng chỉnh sửa nội dung ở mọi nơi:
+     + Cách 1: Vào Tab 2 "Cấu hình ghép & Chữ ký" -> Thẻ "Cấu hình Trang Bìa" đã mở sẵn toàn bộ 8 ô nhập liệu để Thầy/Cô sửa trực tiếp.
+     + Cách 2: Bấm nút "✎ Chỉnh sửa Trang Bìa" màu xanh ngay tại Tab 1 hoặc tại Chế độ Ghép Tự Do để mở cửa sổ chỉnh sửa nhanh.
+     + Cách 3: Nhấp chuột trực tiếp vào viên thuốc "[Trang Bìa Giáo Án ✎ Sửa]" trên thanh thứ tự dòng chảy để mở bảng sửa.
+   - Tự do tùy biến mọi trường thông tin:
+     + Cơ quan cấp trên (UBND Phường Trung Nhứt / Phòng GD&ĐT...)
+     + Tên trường (Trường Tiểu học Trung Nhứt...)
+     + Tiêu đề bìa (KẾ HOẠCH BÀI DẠY / GIÁO ÁN TỔNG HỢP...)
+     + Tiêu đề phụ / Lớp môn (Lớp 5A2 / Môn Toán & Tiếng Việt...)
+     + Họ và tên giáo viên, Lớp học, Năm học và dòng địa danh / năm chân bìa.
+   - Tự động lưu tức thì (Auto-Save trên từng phím gõ) vào trình duyệt máy tính (localStorage) và có nút "Lưu nội dung Trang Bìa" riêng biệt, tuyệt đối không bị mất nội dung khi tải lại trang.
+   - Có khung mô phỏng xem trước trang bìa thu nhỏ (Miniature Preview) trực quan theo thời gian thực.
+   - Hỗ trợ chèn Trang Bìa cho cả 3 chế độ: Ghép từng tuần, Gộp nhiều tuần thành 1 file và Ghép tài liệu tự do.
+
+★ 3. CHỨC NĂNG GỘP NHIỀU TUẦN THÀNH 1 FILE DUY NHẤT (MULTI-WEEK BUNDLE):
+   - Ngoài chế độ xuất riêng từng tuần, Bản V3 bổ sung tính năng gộp nhiều tuần (ví dụ: Tuần 1 đến Tuần 4, cả Tháng, cả Học kỳ hoặc cả Năm) thành 1 FILE DUY NHẤT.
+   - Tùy chỉnh quy tắc đặt tên file gộp với các thẻ tiện lợi: {tengv}, {min_week}, {max_week}, {lop}, {count_weeks}.
+   - Vị trí chữ ký thông minh:
+     + "Chỉ ký ở cuối file gộp" (Mặc định): Trang cuối cùng của tập tài liệu có bảng chữ ký duyệt.
+     + "Ký ở cuối mỗi tuần": Mỗi tuần đều có bảng duyệt riêng biệt trước khi bước sang tuần tiếp theo.
+   - Nút "Tải Về File Word (.docx)" 1-click trực tiếp ngay trên thông báo hoàn tất, vô cùng tiện lợi.
+
+----------------------------------------------------------------------------------------
+CÁC TÍNH NĂNG NỀN TẢNG KẾ THỪA:
 ----------------------------------------------------------------------------------------
 1. TÙY BIẾN CẤU TRÚC ĐẶT TÊN FILE (Tên_KHBD_Tuần_Lớp_Môn):
    - Thầy/Cô có thể tùy ý thêm/xóa/sửa cấu trúc tên file với các thẻ: {week}, {lop}, {mon}.
@@ -38,43 +70,25 @@ CÁC TÍNH NĂNG NÂNG CẤP V2 VÀ QUY CHUẨN THIẾT KẾ:
    - Có ô "Xem trước tên file" cập nhật trực tiếp theo thời gian thực.
 
 2. CHÈN BẢNG CHỮ KÝ DUYỆT LINH HOẠT (TÙY CHỌN 1 CỘT, 2 CỘT HOẶC 3 CỘT):
-   - Nằm ở cuối trang của mỗi tuần (hoặc cuối tài liệu ghép tự do).
-   - Thầy/Cô có thể bấm chọn 1 trong 3 kiểu bố cục phù hợp với quy định từng đơn vị:
+   - Thầy/Cô có thể bấm chọn 1 trong 3 kiểu bố cục:
      + 1 Cột (Giáo viên): Dành cho kế hoạch bài dạy cá nhân, chữ ký đặt ở góc phải phía dưới.
      + 2 Cột (Tổ trưởng - GV): Cột trái Tổ trưởng kiểm tra, cột phải Giáo viên soạn bài.
      + 3 Cột (BGH - Tổ trưởng - GV): Chuẩn duyệt 3 cấp đầy đủ của trường tiểu học.
-   - Bố cục 3 cột chuẩn văn bản giáo dục:
-     + Cột 1 (Bên trái): BGH (Chức vụ: HIỆU TRƯỞNG / PHÓ HIỆU TRƯỞNG, khoảng trắng ký & đóng dấu, Họ và tên BGH).
-     + Cột 2 (Ở giữa): Tổ trưởng chuyên môn (TỔ TRƯỞNG, khoảng trắng ký tên, Họ và tên Tổ trưởng).
-     + Cột 3 (Bên phải): Dòng ngày tháng địa phương (nhập tùy chỉnh, mặc định: "Trung Nhứt, ngày     tháng     năm 202..."), GIÁO VIÊN, khoảng trắng ký tên, Họ và tên Giáo viên.
    - TUYỆT ĐỐI KHÔNG CÓ DÒNG "(Ký và ghi rõ họ tên)" theo đúng yêu cầu chỉ đạo.
-   - LƯU 1 LẦN DÙNG MÃI MÃI: Thầy/Cô chỉ cần nhập thông tin 1 lần và bấm nút "Lưu cấu hình vào trình duyệt" (lưu vào localStorage / config.json), phần mềm tự ghi nhớ kiểu cột và họ tên cho tất cả các lần sau.
+   - Tự ghi nhớ kiểu cột và họ tên cho tất cả các lần sau.
 
 3. TÙY CHỌN ĐÁNH SỐ TRANG LIÊN TỤC TOÀN TUẦN:
-   - Checkbox bật/tắt linh hoạt. Khi bật, số trang ở chân trang (Footer) sẽ đánh số liên tục từ trang 1 đến trang cuối của tuần (không bị lặp lại số trang khi sang môn mới).
+   - Bật/tắt linh hoạt, số trang Footer đánh số liên tục không bị đứt đoạn.
 
-4. BỘ XỬ LÝ AN TOÀN FILE LOCK:
-   - Không bị báo lỗi xung đột ngay cả khi Thầy/Cô đang mở xem file Word đó trên máy tính.
+4. HỖ TRỢ GHÉP NHIỀU TIẾT TRONG CÙNG 1 MÔN:
+   - Gom đủ tất cả các tiết (Toán tiết 1, Toán tiết 2...) theo thứ tự tự nhiên mà không bị ghi đè hay mất bài.
 
-5. XEM CHI TIẾT MÔN CÒN THIẾU & SỐ TIẾT:
-   - Nhấp vào chữ "(Xem)" ở các thẻ tuần để mở cửa sổ xem chính xác môn nào đã có (kèm số lượng tiết nếu môn có nhiều file) và môn nào còn thiếu.
+5. BẢO TOÀN HÌNH ẢNH MINH HỌA VÀ ĐỊNH DẠNG:
+   - Quản lý và lập lại bản đồ rId tránh trùng lặp hình ảnh hoặc mất sơ đồ, tranh ảnh minh họa.
 
-6. HỖ TRỢ GHÉP NHIỀU TIẾT TRONG CÙNG 1 MÔN:
-   - Nếu trong một tuần, một môn học có nhiều tiết dạy ở các file riêng biệt (ví dụ: Toan_T1_Tiet1.docx, Toan_T1_Tiet2.docx), phần mềm tự động gom đủ tất cả các tiết theo thứ tự tự nhiên mà không bị ghi đè hay mất bài.
+6. CHẾ ĐỘ GHÉP TÀI LIỆU TỰ DO (FREE MERGE):
+   - Ghép bất kỳ tài liệu Word nào (lịch báo giảng, đề cương, phụ lục...) với tính năng sắp xếp thứ tự linh hoạt.
 
-7. BẢO TOÀN HÌNH ẢNH MINH HỌA VÀ ĐỊNH DẠNG (OPENXML CHUẨN):
-   - Tự động đổi tên và ánh xạ lại các mã liên kết hình ảnh (Relationship ID), tránh tình trạng trùng lặp mã rId làm mất ảnh minh họa bài dạy hoặc làm lỗi file Word khi mở.
-
-8. CHẾ ĐỘ GHÉP TÀI LIỆU TỰ DO (FREE MERGE):
-   - Cho phép ghép danh sách tài liệu Word bất kỳ (báo cáo, đề thi, chuyên đề, kế hoạch năm...) với tính năng kéo thả sắp xếp thứ tự, chèn ngắt trang, đánh số trang liên tục và chèn khối chữ ký duyệt.
-
-9. KHẢ NĂNG TIẾP NHẬN FILE & BẢO MẬT BỘ NHỚ RAM:
-   - Phần mềm không đặt giới hạn cứng số lượng file nạp vào. Máy tính RAM 4GB xử lý mượt mà 300 - 500 file Word cả năm học; máy tính RAM 8GB trở lên có thể nạp thoải mái 800 - 1.500+ file cùng lúc.
-   - Toàn bộ file chỉ lưu tạm trong RAM của trình duyệt, không gửi lên máy chủ internet và TỰ ĐỘNG BIẾN MẤT 100% (giải phóng sạch RAM) ngay khi đóng tab hoặc bấm "Làm mới".
-
-10. ĐIỂM NEO NĂNG SUẤT: QUY TRÌNH GHÉP NHẸ MÁY, CHỐNG TREO ĐƠ:
-   - Để máy tính chạy êm, mượt và không bị đứng trình duyệt khi xử lý hàng trăm file:
-     + Bước 1 - Ghép theo đợt (Học kỳ): Tránh ghép dồn 35 tuần cùng lúc. Bấm nút [Học kỳ 1] để ghép trước 18 tuần đầu (~180 file), lưu file xong bấm tiếp [Học kỳ 2] để ghép 17 tuần còn lại.
-     + Bước 2 - Ưu tiên "Lưu vào thư mục máy": Chọn lưu trực tiếp xuống ổ cứng máy tính để giải phóng RAM ngay, hạn chế dùng nút tải ZIP vì nén ZIP sẽ chiếm thêm nhiều bộ nhớ tạm.
-     + Bước 3 - Làm mới bộ nhớ: Sau khi hoàn tất một đợt lớn, bấm nút [🔄 Làm mới] ở góc trên bên phải để giải phóng 100% RAM trước khi làm đợt mới. Hãy đóng bớt các tab web nặng (như xem video, Facebook) trên máy khi chạy.
+7. BẢO MẬT TUYỆT ĐỐI & CHẠY OFFLINE:
+   - 100% chạy trên máy tính cá nhân, không tải dữ liệu lên mạng, an toàn thông tin tối đa.
 ========================================================================================
