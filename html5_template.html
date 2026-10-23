@@ -318,7 +318,7 @@
                         </div>
                     </div>
 
-                    <!-- Tùy chọn ngắt trang & số trang -->
+                    <!-- Tùy chọn ngắt trang & số trang & nén dung lượng -->
                     <div class="options-grid">
                         <label class="checkbox-card">
                             <input type="checkbox" id="chk-page-break" checked>
@@ -332,6 +332,25 @@
                             <div>
                                 <div class="checkbox-card-title">Đánh số trang liên tục toàn tuần (Tùy chọn)</div>
                                 <div class="checkbox-card-desc">Tự động xóa reset số trang ở đầu mỗi môn học, giúp chân trang (Footer) đánh số liên tục từ trang 1 đến hết tuần.</div>
+                            </div>
+                        </label>
+                        <label class="checkbox-card" style="border-color: rgba(37, 99, 235, 0.4); background: rgba(37, 99, 235, 0.03);">
+                            <input type="checkbox" id="chk-auto-compress" checked>
+                            <div>
+                                <div class="checkbox-card-title" style="color: var(--primary); display:flex; align-items:center; gap:6px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    Tự động nén & tối ưu hóa ảnh sau khi ghép (Giảm 70% – 90% dung lượng)
+                                </div>
+                                <div class="checkbox-card-desc">Tự động nén sâu ảnh trong file gộp, chuyển ảnh PNG chụp màn hình sang JPG và xóa dữ liệu thừa. Tải về 1 lần file vừa gộp vừa siêu nhẹ!</div>
+                                <div id="compress-level-row" style="margin-top: 6px; display: flex; gap: 8px; align-items: center; font-size: 0.82rem;">
+                                    <span style="font-weight:600; color:var(--text-title);">Mức nén:</span>
+                                    <select id="select-compress-mode" style="padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+                                        <option value="deep" selected>Nén sâu (Khuyên dùng: Max 1200px, 70% Q, PNG &rarr; JPG)</option>
+                                        <option value="standard">Tiêu chuẩn (Max 1600px, 82% Q, nét in ấn A4)</option>
+                                        <option value="ultra">Siêu nén cực hạn (Max 800px, 50% Q - Siêu nhẹ)</option>
+                                        <option value="grayscale">Trắng đen (Grayscale - Photo đề thi/giáo án)</option>
+                                    </select>
+                                </div>
                             </div>
                         </label>
                     </div>
@@ -697,7 +716,7 @@
                         </div>
                     </div>
 
-                    <!-- Tùy chọn ngắt trang & số trang -->
+                    <!-- Tùy chọn ngắt trang & số trang & nén dung lượng -->
                     <div class="options-grid" style="margin-top: 1rem;">
                         <label class="checkbox-card">
                             <input type="checkbox" id="chk-free-page-break" checked>
@@ -711,6 +730,25 @@
                             <div>
                                 <div class="checkbox-card-title">Đánh số trang liên tục toàn văn bản</div>
                                 <div class="checkbox-card-desc">Xóa các điểm ngắt khởi tạo lại trang để số trang dưới chân trang (Footer) chạy liền mạch từ trang 1 đến hết tài liệu.</div>
+                            </div>
+                        </label>
+                        <label class="checkbox-card" style="border-color: rgba(37, 99, 235, 0.4); background: rgba(37, 99, 235, 0.03);">
+                            <input type="checkbox" id="chk-free-auto-compress" checked>
+                            <div>
+                                <div class="checkbox-card-title" style="color: var(--primary); display:flex; align-items:center; gap:6px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    Tự động nén & tối ưu hóa ảnh sau khi ghép (Giảm 70% – 90% dung lượng)
+                                </div>
+                                <div class="checkbox-card-desc">Tự động nén sâu hình ảnh của tài liệu sau khi nối, giữ văn bản sắc nét nhưng file siêu nhẹ. Tải về 1 lần file vừa gộp vừa siêu nhẹ!</div>
+                                <div id="free-compress-level-row" style="margin-top: 6px; display: flex; gap: 8px; align-items: center; font-size: 0.82rem;">
+                                    <span style="font-weight:600; color:var(--text-title);">Mức nén:</span>
+                                    <select id="select-free-compress-mode" style="padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+                                        <option value="deep" selected>Nén sâu (Khuyên dùng: Max 1200px, 70% Q, PNG &rarr; JPG)</option>
+                                        <option value="standard">Tiêu chuẩn (Max 1600px, 82% Q, nét in ấn A4)</option>
+                                        <option value="ultra">Siêu nén cực hạn (Max 800px, 50% Q - Siêu nhẹ)</option>
+                                        <option value="grayscale">Trắng đen (Grayscale - Photo đề thi/giáo án)</option>
+                                    </select>
+                                </div>
                             </div>
                         </label>
                     </div>

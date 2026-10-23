@@ -183,6 +183,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnFreeChips = document.querySelectorAll('.btn-free-chip');
     const chkFreePageBreak = document.getElementById('chk-free-page-break');
     const chkFreeContinuousPage = document.getElementById('chk-free-continuous-page');
+    const chkFreeAutoCompress = document.getElementById('chk-free-auto-compress');
+    const selectFreeCompressMode = document.getElementById('select-free-compress-mode');
     const chkFreeEnableSig = document.getElementById('chk-free-enable-sig');
     const btnFreeSaveSettings = document.getElementById('btn-free-save-settings');
     const freeSaveMsgToast = document.getElementById('free-save-msg-toast');
@@ -323,6 +325,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const chkPageBreak = document.getElementById('chk-page-break');
     const chkContinuousPage = document.getElementById('chk-continuous-page');
+    const chkAutoCompress = document.getElementById('chk-auto-compress');
+    const selectCompressMode = document.getElementById('select-compress-mode');
     const chkEnableSignature = document.getElementById('chk-enable-signature');
     const sigFormWrapper = document.getElementById('sig-form-wrapper');
     const sigPlaceDate = document.getElementById('sig-place-date');
@@ -1097,6 +1101,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (cfg.lopName) inputLopName.value = cfg.lopName;
                 if (cfg.continuousPage !== undefined) chkContinuousPage.checked = cfg.continuousPage;
                 if (cfg.pageBreak !== undefined) chkPageBreak.checked = cfg.pageBreak;
+                if (cfg.autoCompress !== undefined && chkAutoCompress) chkAutoCompress.checked = cfg.autoCompress;
+                if (cfg.compressMode && selectCompressMode) selectCompressMode.value = cfg.compressMode;
                 if (cfg.sigLayout) {
                     setSigLayout(cfg.sigLayout);
                 } else {
@@ -1228,6 +1234,8 @@ document.addEventListener('DOMContentLoaded', () => {
             lopName: inputLopName.value.trim(),
             continuousPage: chkContinuousPage.checked,
             pageBreak: chkPageBreak.checked,
+            autoCompress: chkAutoCompress ? chkAutoCompress.checked : true,
+            compressMode: selectCompressMode ? selectCompressMode.value : 'deep',
             enableSig: chkEnableSignature.checked,
             sigLayout: state.sigLayout || '3col',
             placeDate: sigPlaceDate.value.trim(),
@@ -1260,6 +1268,8 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('giao_an_desktop_v2_settings', JSON.stringify(cfg));
 
         if (chkFreeEnableSig) chkFreeEnableSig.checked = cfg.enableSig;
+        if (chkFreeAutoCompress && chkAutoCompress) chkFreeAutoCompress.checked = chkAutoCompress.checked;
+        if (selectFreeCompressMode && selectCompressMode) selectFreeCompressMode.value = selectCompressMode.value;
         if (freeSigFormWrapper) freeSigFormWrapper.classList.toggle('hidden', !cfg.enableSig);
         if (freeSigPlaceDate) freeSigPlaceDate.value = cfg.placeDate;
         if (freeSigBghRole) freeSigBghRole.value = cfg.bghRole;
@@ -2630,6 +2640,250 @@ document.addEventListener('DOMContentLoaded', () => {
         return body;
     }
 
+    // ==========================================================================
+    // BỘ NÉN & TỐI ƯU HÓA HÌNH ẢNH FILE WORD (.DOCX) CHUYÊN SÂU
+    // ==========================================================================
+    const COMPRESS_PRESETS = {
+        deep: {
+            quality: 0.70,
+            maxWidth: 1200,
+            pngStrategy: 'auto-jpg',
+            colorMode: 'color',
+            removeThumbnail: true,
+            maxZip: true
+        },
+        standard: {
+            quality: 0.82,
+            maxWidth: 1600,
+            pngStrategy: 'keep-png',
+            colorMode: 'color',
+            removeThumbnail: false,
+            maxZip: true
+        },
+        ultra: {
+            quality: 0.50,
+            maxWidth: 800,
+            pngStrategy: 'force-jpg',
+            colorMode: 'color',
+            removeThumbnail: true,
+            maxZip: true
+        },
+        grayscale: {
+            quality: 0.58,
+            maxWidth: 1000,
+            pngStrategy: 'force-jpg',
+            colorMode: 'grayscale',
+            removeThumbnail: true,
+            maxZip: true
+        }
+    };
+
+    async function compressDocxBytes(inputBuffer, modeKey = 'deep', onProgress) {
+        const config = COMPRESS_PRESETS[modeKey] || COMPRESS_PRESETS.deep;
+        try {
+            const zip = await JSZip.loadAsync(inputBuffer);
+
+            // 1. Xóa thumbnail ẩn nếu có
+            if (config.removeThumbnail) {
+                zip.remove("docProps/thumbnail.emf");
+                zip.remove("docProps/thumbnail.wmf");
+                zip.remove("docProps/thumbnail.jpeg");
+                const rootRels = zip.file("_rels/.rels");
+                if (rootRels) {
+                    let text = await rootRels.async("string");
+                    text = text.replace(/<Relationship[^>]+Target="docProps\/thumbnail\.[^"]+"[^>]*\/>/g, '');
+                    zip.file("_rels/.rels", text);
+                }
+            }
+
+            // 2. Tìm tất cả ảnh trong word/media/
+            const mediaEntries = [];
+            zip.forEach((relPath, entry) => {
+                if (!entry.dir && relPath.toLowerCase().startsWith("word/media/")) {
+                    mediaEntries.push(entry);
+                }
+            });
+
+            if (mediaEntries.length === 0) {
+                return inputBuffer;
+            }
+
+            const renamedMap = new Map();
+            let count = 0;
+
+            for (const entry of mediaEntries) {
+                count++;
+                if (onProgress) {
+                    onProgress(`Đang tối ưu ảnh ${count}/${mediaEntries.length}...`);
+                }
+                const match = entry.name.match(/word\/media\/(.+)$/i);
+                const simpleName = match ? match[1] : '';
+                const extMatch = entry.name.match(/\.([a-zA-Z0-9]+)$/);
+                const ext = extMatch ? extMatch[1].toLowerCase() : '';
+
+                if (['jpg', 'jpeg', 'png'].includes(ext)) {
+                    const rawBytes = await entry.async("uint8array");
+                    // Nén nếu ảnh >= 20KB
+                    if (rawBytes.byteLength >= 20480) {
+                        const res = await compressSingleImage(rawBytes, ext, config);
+                        if (res && res.bytes) {
+                            if (res.targetFormat === 'jpg' && ext === 'png') {
+                                const newSimpleName = simpleName.replace(/\.png$/i, '.jpg');
+                                const newFullPath = `word/media/${newSimpleName}`;
+                                zip.remove(entry.name);
+                                zip.file(newFullPath, res.bytes);
+                                renamedMap.set(simpleName, newSimpleName);
+                            } else if (res.bytes.byteLength < rawBytes.byteLength) {
+                                zip.file(entry.name, res.bytes);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 3. Cập nhật mối liên kết XML nếu có ảnh chuyển từ PNG -> JPG
+            if (renamedMap.size > 0) {
+                const relsEntries = [];
+                zip.forEach((path, entry) => {
+                    if (!entry.dir && path.toLowerCase().endsWith(".rels")) {
+                        relsEntries.push(entry);
+                    }
+                });
+                for (const relsEntry of relsEntries) {
+                    let content = await relsEntry.async("string");
+                    let modified = false;
+                    for (const [oldName, newName] of renamedMap.entries()) {
+                        if (content.includes(oldName)) {
+                            content = content.replaceAll(oldName, newName);
+                            modified = true;
+                        }
+                    }
+                    if (modified) zip.file(relsEntry.name, content);
+                }
+
+                const ctEntry = zip.file("[Content_Types].xml");
+                if (ctEntry) {
+                    let ct = await ctEntry.async("string");
+                    if (!ct.includes('Extension="jpg"')) {
+                        ct = ct.replace('</Types>', '<Default Extension="jpg" ContentType="image/jpeg"/></Types>');
+                    }
+                    for (const [oldName, newName] of renamedMap.entries()) {
+                        if (ct.includes(oldName)) {
+                            ct = ct.replaceAll(oldName, newName);
+                            ct = ct.replaceAll(`PartName="/word/media/${newName}" ContentType="image/png"`, `PartName="/word/media/${newName}" ContentType="image/jpeg"`);
+                        }
+                    }
+                    zip.file("[Content_Types].xml", ct);
+                }
+            }
+
+            // 4. Đóng gói lại ZIP với mức nén tối đa (Deflate Level 9)
+            return await zip.generateAsync({
+                type: "uint8array",
+                compression: "DEFLATE",
+                compressionOptions: { level: config.maxZip ? 9 : 6 }
+            });
+        } catch (err) {
+            console.warn('Lỗi trong quá trình nén ảnh DOCX:', err);
+            return inputBuffer; // Trả về bản gốc nếu có bất kỳ lỗi nào, an toàn 100%
+        }
+    }
+
+    function compressSingleImage(bytes, ext, config) {
+        return new Promise((resolve) => {
+            try {
+                if (typeof Image === 'undefined' || typeof document === 'undefined') {
+                    resolve(null);
+                    return;
+                }
+                const origMime = ext === 'png' ? 'image/png' : 'image/jpeg';
+                const blob = new Blob([bytes], { type: origMime });
+                const img = new Image();
+                const url = URL.createObjectURL(blob);
+
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+                    let width = img.naturalWidth || img.width;
+                    let height = img.naturalHeight || img.height;
+
+                    const maxDim = config.maxWidth;
+                    if (width > maxDim || height > maxDim) {
+                        if (width >= height) {
+                            height = Math.round(height * (maxDim / width));
+                            width = maxDim;
+                        } else {
+                            width = Math.round(width * (maxDim / height));
+                            height = maxDim;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    let targetFormat = ext === 'png' ? 'png' : 'jpg';
+                    if (ext === 'png') {
+                        if (config.pngStrategy === 'force-jpg') {
+                            targetFormat = 'jpg';
+                        } else if (config.pngStrategy === 'auto-jpg') {
+                            let hasAlpha = false;
+                            try {
+                                const imgData = ctx.getImageData(0, 0, width, height).data;
+                                for (let i = 3; i < imgData.length; i += 16) {
+                                    if (imgData[i] < 240) { hasAlpha = true; break; }
+                                }
+                            } catch (e) {}
+                            if (!hasAlpha) targetFormat = 'jpg';
+                        }
+                    }
+
+                    if (targetFormat === 'jpg') {
+                        const tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = width;
+                        tempCanvas.height = height;
+                        const tempCtx = tempCanvas.getContext('2d');
+                        tempCtx.fillStyle = '#ffffff';
+                        tempCtx.fillRect(0, 0, width, height);
+                        tempCtx.drawImage(canvas, 0, 0);
+                        ctx.clearRect(0, 0, width, height);
+                        ctx.drawImage(tempCanvas, 0, 0);
+                    }
+
+                    if (config.colorMode === 'grayscale') {
+                        const imgData = ctx.getImageData(0, 0, width, height);
+                        const d = imgData.data;
+                        for (let i = 0; i < d.length; i += 4) {
+                            const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+                            d[i] = gray; d[i + 1] = gray; d[i + 2] = gray;
+                        }
+                        ctx.putImageData(imgData, 0, 0);
+                    }
+
+                    const exportMime = targetFormat === 'jpg' ? 'image/jpeg' : 'image/png';
+                    canvas.toBlob((newBlob) => {
+                        if (!newBlob) { resolve(null); return; }
+                        newBlob.arrayBuffer().then(buf => {
+                            resolve({
+                                bytes: new Uint8Array(buf),
+                                targetFormat: targetFormat
+                            });
+                        });
+                    }, exportMime, targetFormat === 'jpg' ? config.quality : undefined);
+                };
+
+                img.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    resolve(null);
+                };
+                img.src = url;
+            } catch (e) {
+                resolve(null);
+            }
+        });
+    }
+
     // Ghép tài liệu Word an toàn tuyệt đối, hỗ trợ cả 1 môn và nhiều môn (Chuẩn OpenXML ISO/IEC 29500)
     async function mergeWordDocuments(buffers, options = {}) {
         const {
@@ -3083,6 +3337,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     state.mergedResults[bundleFileName] = finalBundleBytes;
                 }
 
+                // Tự động nén & tối ưu dung lượng file gộp nhiều tuần nếu được chọn
+                if (chkAutoCompress && chkAutoCompress.checked && state.mergedResults[bundleFileName]) {
+                    const modeKey = selectCompressMode ? selectCompressMode.value : 'deep';
+                    const origSize = state.mergedResults[bundleFileName].byteLength;
+                    appendLog(`Đang tự động nén tối ưu hóa hình ảnh cho file gộp "${bundleFileName}"...`, 'info');
+                    if (progressStatusMsg) progressStatusMsg.textContent = 'Đang tự động nén ảnh tối ưu dung lượng...';
+                    state.mergedResults[bundleFileName] = await compressDocxBytes(state.mergedResults[bundleFileName], modeKey, (msg) => {
+                        if (progressStatusMsg) progressStatusMsg.textContent = msg;
+                    });
+                    const newSize = state.mergedResults[bundleFileName].byteLength;
+                    const savedPct = origSize > 0 ? Math.round((1 - newSize / origSize) * 100) : 0;
+                    appendLog(`✓ Nén ảnh thành công "${bundleFileName}": ${formatFileSize(origSize)} → ${formatFileSize(newSize)} (Tiết kiệm ${savedPct}%)`, 'success');
+                }
+
                 if (progressBarFill) progressBarFill.style.width = '100%';
                 if (progressPercentVal) progressPercentVal.textContent = '100%';
                 if (progressStatusMsg) progressStatusMsg.textContent = 'Hoàn tất gộp giáo án nhiều tuần!';
@@ -3168,7 +3436,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (!outFileName.toLowerCase().endsWith('.docx')) outFileName += '.docx';
                         outFileName = outFileName.replace(/[<>:"/\\|?*]/g, '_');
 
-                        state.mergedResults[outFileName] = mergedBytes;
+                        let finalMerged = mergedBytes;
+                        if (chkAutoCompress && chkAutoCompress.checked) {
+                            const modeKey = selectCompressMode ? selectCompressMode.value : 'deep';
+                            const origSize = mergedBytes.byteLength;
+                            if (progressStatusMsg) progressStatusMsg.textContent = `Đang nén tối ưu ảnh Tuần ${weekPad}...`;
+                            finalMerged = await compressDocxBytes(mergedBytes, modeKey);
+                            const newSize = finalMerged.byteLength;
+                            const savedPct = origSize > 0 ? Math.round((1 - newSize / origSize) * 100) : 0;
+                            appendLog(`  ↳ Nén ảnh Tuần ${weekPad}: ${formatFileSize(origSize)} → ${formatFileSize(newSize)} (Tiết kiệm ${savedPct}%)`, 'success');
+                        }
+
+                        state.mergedResults[outFileName] = finalMerged;
                         successCount++;
                         appendLog(`✓ Ghép thành công Tuần ${weekPad} -> ${outFileName}`, 'success');
                     } catch (err) {
@@ -3726,7 +4005,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!outName.toLowerCase().endsWith('.docx')) outName += '.docx';
                 outName = outName.replace(/[<>:"/\\|?*]/g, '_');
 
-                state.freeMergedResult = mergedBytes;
+                let finalFreeBytes = mergedBytes;
+                if (chkFreeAutoCompress && chkFreeAutoCompress.checked) {
+                    const modeKey = selectFreeCompressMode ? selectFreeCompressMode.value : 'deep';
+                    const origSize = mergedBytes.byteLength;
+                    appendFreeLog(`Đang tự động nén tối ưu hóa hình ảnh cho file "${outName}"...`, 'info');
+                    if (freeProgressStatusMsg) freeProgressStatusMsg.textContent = 'Đang nén ảnh tối ưu dung lượng...';
+                    finalFreeBytes = await compressDocxBytes(mergedBytes, modeKey, (msg) => {
+                        if (freeProgressStatusMsg) freeProgressStatusMsg.textContent = msg;
+                    });
+                    const newSize = finalFreeBytes.byteLength;
+                    const savedPct = origSize > 0 ? Math.round((1 - newSize / origSize) * 100) : 0;
+                    appendFreeLog(`✓ Nén ảnh thành công: ${formatFileSize(origSize)} → ${formatFileSize(newSize)} (Tiết kiệm ${savedPct}%)`, 'success');
+                }
+
+                state.freeMergedResult = finalFreeBytes;
                 state.freeMergedFileName = outName;
 
                 if (freeProgressBarFill) freeProgressBarFill.style.width = '100%';

@@ -29,6 +29,11 @@
 - Toàn bộ quá trình đọc, ghép và xuất file được thực hiện trực tiếp trong bộ nhớ RAM trình duyệt của máy Thầy/Cô bằng WebAssembly/JavaScript thuần.
 - Không gửi bất kỳ tệp giáo án nào lên internet, an toàn thông tin 100%.
 
+### 5. 🗜️ Tích Hợp Tự Động Nén & Tối Ưu Hình Ảnh (Vừa Gộp - Vừa Nén)
+- **Giảm 70% – 90% dung lượng**: Tự động nén sâu hình ảnh của toàn bộ các môn sau khi ghép, chuyển đổi ảnh PNG chụp màn hình sang JPG và xóa cache rác ngầm của Word.
+- **4 Chế độ linh hoạt**: Nén sâu (Khuyên dùng), Tiêu chuẩn, Siêu nén cực hạn, Trắng đen (thang độ xám cho giáo án in photo).
+- **1 Thao tác duy nhất**: Tải về nhận ngay file Word vừa ghép hoàn chỉnh vừa siêu nhẹ, không cần chuyển qua phần mềm thứ ba.
+
 ---
 
 ## 💻 3 CÁCH SỬ DỤNG TIỆN LỢI
