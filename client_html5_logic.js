@@ -24,22 +24,109 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================================
     // Canonical Subjects & Week Extraction
     // ==========================================================================
+    function cleanCustomSubject(str) {
+        if (!str) return '';
+        let s = str.trim();
+        s = s.replace(/\.(docx|doc)$/i, '');
+        s = s.replace(/(?:tu[aàầáảãạ]n|tuan|week|w|t)[\s_.-]*0*([12]\d|3[0-5]|[1-9])(?=[^\d]|$)/gi, ' ');
+        s = s.replace(/[-_.]0*([12]\d|3[0-5]|[1-9])[-_.]/g, ' ');
+        s = s.replace(/(?:l[oớơ]p|khoi|lop)[\s_.-]*\d+[a-zA-Z]?/gi, ' ');
+        s = s.replace(/(?:ti[eế]t|tiet|bai|b)[\s_.-]*\d+/gi, ' ');
+        s = s.replace(/^[_\-.\s]+|[_\-.\s]+$/g, '').replace(/[\s_\-]+/g, ' ').trim();
+        return s;
+    }
+
+    const STANDARD_SUBJECT_NAMES = [
+        'Tiếng Việt', 'Toán', 'Đạo đức', 'Tự nhiên và Xã hội', 'Khoa học', 'Lịch sử và Địa lí',
+        'Tin học và Công nghệ', 'Công nghệ', 'Hoạt động trải nghiệm', 'Tin học',
+        'Âm nhạc', 'Mĩ thuật', 'Giáo dục thể chất', 'Tiếng Anh', 'Lịch báo giảng'
+    ];
+
     function canonicalSubject(name) {
+        if (!name) return 'Môn khác';
         const raw = (name || '').trim();
-        const norm = raw.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-        if (norm.includes('tieng viet') || norm === 'tv') return 'Tiếng Việt';
+        const withoutExt = raw.replace(/\.(docx|doc)$/i, '');
+        const norm = withoutExt.replace(/[đĐ]/g, 'd').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+        // 1. Tiếng Việt
+        if (norm.includes('tieng viet') || norm.includes('tiengviet') || /(?:^|[\s_.\-])tv(?=[0-9\s_.\-]|$)/i.test(norm)) return 'Tiếng Việt';
+
+        // 2. Toán
         if (norm.includes('toan')) return 'Toán';
-        if (norm.includes('khoa hoc') || norm === 'kh') return 'Khoa học';
-        if (norm.includes('lich su') || norm.includes('dia li') || norm.includes('lsdl') || norm.includes('ls&dl')) return 'Lịch sử và Địa lí';
-        if (norm.includes('dao duc') || norm === 'dd') return 'Đạo đức';
-        if (norm.includes('cong nghe') || norm === 'cn') return 'Công nghệ';
-        if (norm.includes('trai nghiem') || norm.includes('hdtn')) return 'Hoạt động trải nghiệm';
-        if (norm.includes('tin hoc') || norm === 'tin') return 'Tin học';
-        if (norm.includes('am nhac')) return 'Âm nhạc';
-        if (norm.includes('mi thuat') || norm.includes('my thuat')) return 'Mĩ thuật';
-        if (norm.includes('the duc') || norm.includes('gdtc') || norm.includes('the chat')) return 'Giáo dục thể chất';
-        if (norm.includes('tieng anh') || norm.includes('english')) return 'Tiếng Anh';
-        return raw || 'Môn khác';
+
+        // 3. Tự nhiên và Xã hội (TNXH - Môn học trọng tâm Lớp 1, 2, 3)
+        if (norm.includes('tu nhien') || norm.includes('xa hoi') || norm.includes('tnxh') || /(?:^|[\s_.\-])(tnxh|tn[\s_\-&]*xh)(?=[0-9\s_.\-]|$)/i.test(norm)) return 'Tự nhiên và Xã hội';
+
+        // 4. Khoa học (Lớp 4, 5)
+        if (norm.includes('khoa hoc') || norm.includes('khoahoc') || norm.includes('khtn') || /(?:^|[\s_.\-])kh(?=[0-9\s_.\-]|$)/i.test(norm)) return 'Khoa học';
+
+        // 5. Lịch sử và Địa lí (Lớp 4, 5)
+        if (norm.includes('lich su') || norm.includes('dia li') || norm.includes('dia ly') || /(?:^|[\s_.\-])(lsdl|ls[\s_\-&]*dl)(?=[0-9\s_.\-]|$)/i.test(norm)) return 'Lịch sử và Địa lí';
+
+        // 6. Đạo đức
+        if (norm.includes('dao duc') || norm.includes('daoduc') || /(?:^|[\s_.\-])dd(?=[0-9\s_.\-]|$)/i.test(norm)) return 'Đạo đức';
+
+        // 7. Tin học và Công nghệ
+        if (norm.includes('tin hoc va cong nghe') || norm.includes('th&cn') || norm.includes('th-cn') || norm.includes('th_cn')) return 'Tin học và Công nghệ';
+
+        // 8. Công nghệ
+        if (norm.includes('cong nghe') || norm.includes('congnghe') || /(?:^|[\s_.\-])cn(?=[0-9\s_.\-]|$)/i.test(norm)) return 'Công nghệ';
+
+        // 9. Hoạt động trải nghiệm
+        if (norm.includes('trai nghiem') || norm.includes('hoat dong trai nghiem') || /(?:^|[\s_.\-])(hdtn|hdtnhn|hd[\s_\-&]*tn)(?=[0-9\s_.\-]|$)/i.test(norm)) return 'Hoạt động trải nghiệm';
+
+        // 10. Tin học
+        if (norm.includes('tin hoc') || norm.includes('tinhoc') || /(?:^|[\s_.\-])tin(?=[0-9\s_.\-]|$)/i.test(norm) || (/(?:^|[\s_.\-])th(?=[0-9\s_.\-]|$)/i.test(norm) && !norm.includes('tieu hoc') && !norm.includes('thcs') && !norm.includes('thpt'))) return 'Tin học';
+
+        // 11. Âm nhạc
+        if (norm.includes('am nhac') || norm.includes('amnhac') || norm.includes('nhac') || /(?:^|[\s_.\-])an(?=[0-9\s_.\-]|$)/i.test(norm)) return 'Âm nhạc';
+
+        // 12. Mĩ thuật
+        if (norm.includes('mi thuat') || norm.includes('my thuat') || /(?:^|[\s_.\-])mt(?=[0-9\s_.\-]|$)/i.test(norm)) return 'Mĩ thuật';
+
+        // 13. Giáo dục thể chất
+        if (norm.includes('the chat') || norm.includes('the duc') || /(?:^|[\s_.\-])(gdtc|td)(?=[0-9\s_.\-]|$)/i.test(norm)) return 'Giáo dục thể chất';
+
+        // 14. Tiếng Anh
+        if (norm.includes('tieng anh') || norm.includes('tienganh') || norm.includes('english') || norm.includes('ngoai ngu') || /(?:^|[\s_.\-])(ta|eng)(?=[0-9\s_.\-]|$)/i.test(norm)) return 'Tiếng Anh';
+
+        // 15. Lịch báo giảng
+        if (norm.includes('bao giang') || norm.includes('baogiang') || norm.includes('lich bao') || /(?:^|[\s_.\-])lbg(?=[0-9\s_.\-]|$)/i.test(norm)) return 'Lịch báo giảng';
+
+        const cleaned = cleanCustomSubject(name);
+        return cleaned || raw || 'Môn khác';
+    }
+
+    function detectSubject(filename, parentFolderName) {
+        // 1. Ưu tiên kiểm tra tên file
+        const subFromName = canonicalSubject(filename);
+        if (STANDARD_SUBJECT_NAMES.includes(subFromName)) {
+            return subFromName;
+        }
+
+        // 2. Kiểm tra thư mục cha (nếu có)
+        if (parentFolderName) {
+            const subFromParent = canonicalSubject(parentFolderName);
+            if (STANDARD_SUBJECT_NAMES.includes(subFromParent)) {
+                return subFromParent;
+            }
+        }
+
+        // 3. Nếu là môn học tự tạo ngoài danh mục chuẩn: làm sạch từ tên file
+        const customFromName = cleanCustomSubject(filename);
+        if (customFromName && customFromName.length >= 2) {
+            return customFromName;
+        }
+
+        // 4. Hoặc từ thư mục cha
+        if (parentFolderName) {
+            const customFromParent = cleanCustomSubject(parentFolderName);
+            if (customFromParent && customFromParent.length >= 2) {
+                return customFromParent;
+            }
+        }
+
+        return subFromName || 'Môn khác';
     }
 
     function extractWeekNumber(filename) {
@@ -1405,15 +1492,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const relPath = file.customRelativePath || file.webkitRelativePath || file.name;
             const pathParts = relPath.split(/[\/\\]/);
 
-            let subjectRaw = '';
-            if (pathParts.length > 1) {
-                subjectRaw = pathParts[pathParts.length - 2];
-            } else {
-                subjectRaw = name;
-            }
-
-            const subject = canonicalSubject(subjectRaw);
-            const week = extractWeekNumber(name);
+            const parentFolder = pathParts.length > 1 ? pathParts[pathParts.length - 2] : '';
+            const subject = detectSubject(name, parentFolder);
+            const week = extractWeekNumber(name) || (parentFolder ? extractWeekNumber(parentFolder) : null);
 
             state.filesMap.set(relPath, { file, name, subject, week });
             addedCount++;
@@ -1473,7 +1554,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Append newly detected subjects
-        const DEFAULT_ORDER = ['Tiếng Việt', 'Toán', 'Đạo đức', 'Khoa học', 'Lịch sử và Địa lí', 'Công nghệ', 'Hoạt động trải nghiệm', 'Tin học', 'Tiếng Anh', 'Âm nhạc', 'Mĩ thuật', 'Giáo dục thể chất'];
+        const DEFAULT_ORDER = [
+            'Tiếng Việt', 'Toán', 'Đạo đức', 'Tự nhiên và Xã hội', 'Khoa học', 'Lịch sử và Địa lí',
+            'Tin học và Công nghệ', 'Công nghệ', 'Hoạt động trải nghiệm', 'Tin học', 'Tiếng Anh',
+            'Âm nhạc', 'Mĩ thuật', 'Giáo dục thể chất', 'Lịch báo giảng'
+        ];
         const remaining = Array.from(subjectsMap.values()).map(s => ({ name: s.name, enabled: true, count: s.count }));
         remaining.sort((a, b) => {
             let iA = DEFAULT_ORDER.indexOf(a.name);
@@ -1722,7 +1807,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (presetTvFirst) {
         presetTvFirst.addEventListener('click', () => {
-            const TV_FIRST = ['Tiếng Việt', 'Toán', 'Khoa học', 'Lịch sử và Địa lí', 'Đạo đức', 'Công nghệ', 'Hoạt động trải nghiệm', 'Tin học', 'Tiếng Anh', 'Âm nhạc', 'Mĩ thuật', 'Giáo dục thể chất'];
+            const TV_FIRST = ['Tiếng Việt', 'Toán', 'Đạo đức', 'Tự nhiên và Xã hội', 'Khoa học', 'Lịch sử và Địa lí', 'Tin học và Công nghệ', 'Công nghệ', 'Hoạt động trải nghiệm', 'Tin học', 'Tiếng Anh', 'Âm nhạc', 'Mĩ thuật', 'Giáo dục thể chất', 'Lịch báo giảng'];
             state.subjectsList.sort((a, b) => {
                 let iA = TV_FIRST.indexOf(a.name);
                 let iB = TV_FIRST.indexOf(b.name);
@@ -1738,7 +1823,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (presetToanFirst) {
         presetToanFirst.addEventListener('click', () => {
-            const TOAN_FIRST = ['Toán', 'Tiếng Việt', 'Khoa học', 'Lịch sử và Địa lí', 'Đạo đức', 'Công nghệ', 'Hoạt động trải nghiệm', 'Tin học', 'Tiếng Anh', 'Âm nhạc', 'Mĩ thuật', 'Giáo dục thể chất'];
+            const TOAN_FIRST = ['Toán', 'Tiếng Việt', 'Đạo đức', 'Tự nhiên và Xã hội', 'Khoa học', 'Lịch sử và Địa lí', 'Tin học và Công nghệ', 'Công nghệ', 'Hoạt động trải nghiệm', 'Tin học', 'Tiếng Anh', 'Âm nhạc', 'Mĩ thuật', 'Giáo dục thể chất', 'Lịch báo giảng'];
             state.subjectsList.sort((a, b) => {
                 let iA = TOAN_FIRST.indexOf(a.name);
                 let iB = TOAN_FIRST.indexOf(b.name);
